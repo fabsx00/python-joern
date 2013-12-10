@@ -41,6 +41,22 @@ Object.metaClass.getFunctionByName = { aName ->
 }
 
 /**
+   Retrieve function by filename and location.
+   @param filename filename
+   @param location location string of the form
+   startLine:stopLine:startIndex:stopIndex
+*/
+
+Object.metaClass.getFunctionByFilenameAndLoc = { filename, loc ->
+  getFileByName(filename).out('IS_FILE_OF')
+  .filter{ it.type == 'Function' && it.location == loc}
+}
+
+Object.metaClass.getFileByName = { filename ->
+  queryNodeIndex('type:File AND ' + 'filepath:"' + filename + '"')
+}
+
+/**
    Retrieve function by name matching regular
    expression.
    @param aNameRegex regular expression function names must match.
