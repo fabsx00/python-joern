@@ -8,7 +8,8 @@ class JoernSteps:
 
     def __init__(self):
         self._initJoernSteps()
-    
+        self.initCommandSent = False
+
     def setGraphDbURL(self, url):
         """ Sets the graph database URL. By default,
         http://localhost:7474/db/data/ is used."""
@@ -27,7 +28,11 @@ class JoernSteps:
         joernsteps directory to be used in the query, these step
         definitions are prepended to the query."""
         
-        finalQuery = self.initCommand
+        if not self.initCommandSent:
+            self.initCommandSent = True
+            finalQuery = self.initCommand
+        else:
+            finalQuery = ""
         finalQuery += query
         return self.gremlin.execute_script(finalQuery)
         
