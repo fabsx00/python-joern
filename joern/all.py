@@ -1,4 +1,5 @@
-from py2neo import neo4j, gremlin, cypher
+from py2neo import neo4j, cypher
+from py2neo_gremlin import Gremlin
 import os
 
 DEFAULT_GRAPHDB_URL = "http://localhost:7474/db/data/"
@@ -16,7 +17,8 @@ class JoernSteps:
     def connectToDatabase(self):
         """ Connects to the database server."""
         self.graphDb = neo4j.GraphDatabaseService(self.graphDbURL)
-    
+        self.gremlin = Gremlin(self.graphDb)
+
     def runGremlinQuery(self, query):
 
         """ Runs the specified gremlin query on the database. It is
@@ -27,7 +29,7 @@ class JoernSteps:
         
         finalQuery = self.initCommand
         finalQuery += query
-        return gremlin.execute(finalQuery, self.graphDb)
+        return self.gremlin.execute_script(finalQuery)
         
     def runCypherQuery(self, cmd):
         """ Runs the specified cypher query on the graph database."""
