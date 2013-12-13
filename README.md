@@ -15,6 +15,4 @@ Dependencies:
 
 ### Installation
 
-	$ pip install python-joern
-
-
+	$ sudo pip2 install git+git://github.com/fabsx00/python-joern.git
