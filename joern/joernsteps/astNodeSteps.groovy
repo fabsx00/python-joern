@@ -1,4 +1,8 @@
 
+Gremlin.defineStep('astNodeToSubNodes', [Vertex,Pipe],{ 
+  _().out('IS_AST_PARENT').loop(1){it.object.out('IS_AST_PARENT').toList() != [] }{true}	     
+})
+
 Gremlin.defineStep('astNodeToFunction', [Vertex,Pipe],{ _().functionId.idToNode() });
 
 Gremlin.defineStep('astNodeToBasicBlock', [Vertex,Pipe], {
