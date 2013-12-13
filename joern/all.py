@@ -54,6 +54,7 @@ class JoernSteps:
             files.sort()
             for f in files:
                 filename = root + f
+                if not filename.endswith('.groovy'): continue
                 initCommand += file(filename).read() + "\n"
         return initCommand
     
