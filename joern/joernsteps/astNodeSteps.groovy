@@ -1,6 +1,8 @@
 
 Gremlin.defineStep('astNodeToSubNodes', [Vertex,Pipe],{ 
-  _().out('IS_AST_PARENT').loop(1){it.object.out('IS_AST_PARENT').toList() != [] }{true}	     
+  _().sideEffect{ depth = 0; }.transform{ [it, 0] }
+  .transform{ it[0] }.sideEffect{ depth++; }.out('IS_AST_PARENT').transform{ [it,depth] }.loop(4)
+    {it.object[0].out('IS_AST_PARENT').toList() != [] }{true}	     
 })
 
 Gremlin.defineStep('astNodeToFunction', [Vertex,Pipe],{ _().functionId.idToNode() });
