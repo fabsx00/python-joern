@@ -3,6 +3,7 @@ from py2neo_gremlin import Gremlin
 import os
 
 DEFAULT_GRAPHDB_URL = "http://localhost:7474/db/data/"
+DEFAULT_STEP_DIR = os.path.dirname(__file__) + '/joernsteps/'
 
 class JoernSteps:
 
@@ -15,6 +16,9 @@ class JoernSteps:
         http://localhost:7474/db/data/ is used."""
         self.graphDbURL = url
         
+    def setStepsDir(self, stepsDir):
+        self.stepsDir = stepsDir
+    
     def connectToDatabase(self):
         """ Connects to the database server."""
         self.graphDb = neo4j.GraphDatabaseService(self.graphDbURL)
@@ -29,6 +33,7 @@ class JoernSteps:
         definitions are prepended to the query."""
         
         if not self.initCommandSent:
+            self.initCommand = self._createInitCommand()
             self.initCommandSent = True
             finalQuery = self.initCommand
         else:
@@ -42,20 +47,15 @@ class JoernSteps:
 
     def _initJoernSteps(self):
         self.graphDbURL = DEFAULT_GRAPHDB_URL
-        
-        self.initCommand = self._createInitCommand()
+        self.stepsDir = DEFAULT_STEP_DIR
 
     def _createInitCommand(self):
         
-        stepsDir = os.path.dirname(__file__) + '/joernsteps/'
-
         initCommand = ""
-        for (root, dirs, files) in os.walk(stepsDir):
+        for (root, dirs, files) in os.walk(self.stepsDir):
             files.sort()
             for f in files:
                 filename = root + f
                 if not filename.endswith('.groovy'): continue
                 initCommand += file(filename).read() + "\n"
         return initCommand
-    
-    

@@ -40,7 +40,8 @@ Gremlin.defineStep('dataFlowFromRegex', [Vertex, Pipe], { Object [] s ->
   .astNodeToBasicBlock().sideEffect{ sinkId = it.id; }
   
   .sideEffect{ firstRound = true }
-  .as('loopStart').inE('REACHES').filter{ !firstRound || it.var == symbol }.outV().sideEffect{firstRound = false}.sideEffect{ isSource = (it.id in sourceIds) }
+  .as('loopStart').inE('REACHES').filter{ !firstRound || it.var == symbol }
+  .outV().sideEffect{firstRound = false}.sideEffect{ isSource = (it.id in sourceIds) }
   .loop('loopStart'){it.loops < 1 && !isSource } { isSource }
   .transform{ [it.id, sinkId] } 
   .dedup()
@@ -123,11 +124,16 @@ Gremlin.defineStep('dataFlowTo', [Vertex, Pipe], { f ->
 // Expects:
 // [astNode, sourceSymbol]
 
-
 Gremlin.defineStep('directDataFlowTo', [Vertex, Pipe], { it ->
   _().sideEffect{ sourceSymbol = it[1] }.transform{ it[0] }
   .astNodeToBasicBlock().outE('REACHES').filter{ it.var.equals(sourceSymbol) }.inV()
 })
+
+// This version of isNotSanitizedByRegex currently does not check
+// whether any of the nodes on the path re-define the propagated
+// variable. Moreover, it does not even know which symbol is being
+// propagated. Finally, we would need to extract paths for each hop in
+// the DDG.
 
 Gremlin.defineStep('isNotSanitizedByRegex', [Vertex, Pipe], { Object [] san ->
   def sanitizers = san;
@@ -135,12 +141,14 @@ Gremlin.defineStep('isNotSanitizedByRegex', [Vertex, Pipe], { Object [] san ->
   _().sideEffect{ sourceId = it[0]; sinkId = it[1] }
   .transform{ g.v(sourceId)}
   
+  // determine all statements matching the sanitizer regex
   .sideEffect{
     sanIds = it.astNodeToFunction().functionToBasicBlocks()
     .filter{ aRegexFound(it, sanitizers) }.id.toList()
   }
   
   .as('x').out('FLOWS_TO').simplePath()
+  // terminate when walking into a sanitizer node
   .sideEffect{ isSanitizer = (it.id in sanIds) }
   .loop('x'){ it.loops < 40 && it.object.id != sinkId && !isSanitizer}
   .filter{ it.id == sinkId }
