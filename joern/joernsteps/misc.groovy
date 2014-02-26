@@ -1,6 +1,6 @@
 
 // Map node-id to node.
 
-Gremlin.defineStep('idToNode', [Vertex,Pipe], {
+Gremlin.defineStep('idsToNodes', [Vertex,Pipe], {
 	_().transform{ g.v(it) }.scatter()
 })

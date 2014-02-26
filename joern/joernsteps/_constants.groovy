@@ -11,6 +11,8 @@ NODE_CODE = 'code'
 
 TYPE_CALLEE = 'Callee'
 TYPE_FUNCTION = 'Function'
+TYPE_ARGLIST = 'ArgumentList'
+
 
 // Edge types
 
