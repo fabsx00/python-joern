@@ -47,7 +47,7 @@ class IndexLookupTests(PythonJoernTests):
         self.assertEquals(x[0], 'y')
 
 
-class SyntaxOnlyTests(PythonJoernTests):
+class CompositionTests(PythonJoernTests):
     
     def testSyntaxOnlyChaining(self):
         
@@ -57,14 +57,21 @@ class SyntaxOnlyTests(PythonJoernTests):
         x = self.j.runGremlinQuery(query)
         self.assertEquals(len(x), 1)
     
-    def testSyntaxOnlyChainingInvert(self):
+    def testNotComposition(self):
         
         # functions calling foo AND NOT bar
         
-        query = "getCallsTo('foo').not( { getCallsTo('bar') } )"
+        query = "getCallsTo('foo').not{getCallsTo('bar')}"
         x = self.j.runGremlinQuery(query)
         self.assertEquals(len(x), 5)
     
+    def testTuplesComposition(self):
+        
+       query = """queryNodeIndex('type:AssignmentExpr AND code:"x = bar ( y )"')
+       .pairs( _().lval().code, _().rval().code)"""
+       x = self.j.runGremlinQuery(query)
+       self.assertEquals(x[0][0], "x")
+       self.assertEquals(x[0][1], "bar ( y )")
 
 if __name__ == '__main__':
     unittest.main()

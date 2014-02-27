@@ -68,6 +68,7 @@ Object.metaClass.getFunctionsByName = { name ->
 */
 
 Object.metaClass.getCallsTo = { callee ->
+	
 	getNodesWithTypeAndCode(TYPE_CALLEE, callee)
 	.parents()
 }
@@ -113,35 +114,6 @@ Gremlin.defineStep('getArguments', [Vertex,Pipe], { name, i, c = [] ->
 	_()._emitForFunctions({ getArguments(name, i) }, c )
 })
 
-/**
-	Executes closure cl which is expected to return a pipe of
-	nodes. Returns a pipe containing all of these nodes which
-	match the boolean predicate `c`.
-
-	@param cl closure to execute
-	@param c  predicate to evaluate on nodes returned by cl.
-*/
-
-Gremlin.defineStep('_emitForFunctions', [Vertex,Pipe], {
-	Closure cl, c ->
-
-	if(c == [])
-		c = {it.functionId in ids}
-	
-	_().functionId.gather()
-	.transform{
-		ids = it;
-		cl().filter(c)
-	}.scatter()
-})
 
 
-Gremlin.defineStep('not', [Vertex,Pipe], { cl, c = [] ->
-	
-	X = []; Y = []
-	_().aggregate(X)
-	._emitForFunctions(cl, c)
-	.functionId.aggregate(Y)
-	.transform{ X }.scatter().filter{ !(it.functionId in Y) }
-})
 
