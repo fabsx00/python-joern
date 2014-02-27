@@ -1,7 +1,10 @@
 /**
-   Index lookup functions used to provide start node sets for
-   traversals. All of these lookups support wild cards but you need to
-   escape spaces.
+   This module contains index lookup functions employed to provide
+   start node sets for traversals. All of these lookups support wild
+   cards (you will need to escape spaces though) and output predicates
+   to filter output nodes. Since lookup functions are the start of all
+   traversals, output predicates can be used to filter nodes before
+   the rest of the traversal is executed.
 */
 
 
@@ -106,22 +109,47 @@ Object.metaClass.getArguments = { name, i, outputPredicate = { true } ->
 	.filter(outputPredicate)
 }
 
-// Syntax-only description
+/**
+  Retrieve functions matching all traversals in m0 and none of the
+  traversals in m1. Note that traversals are executed in the order
+  specified, so its best to order traversals such that those
+  traversals reducing the number of functions most drastically are
+  specified first.
+
+  @params m0 A list of traversals that must match.
+  @params m1 A list of traversals that must not match.
+
+  @returns Pipe containg functionIds or an empty pipe if m0 is empty.
+
+*/
 
 Object.metaClass.functionsMatching = { m0, m1 ->
-	execTraversal = { it.functionId.toList() }	
-
+	
 	if(m0.size() == 0) return [];
-	x = execTraversal(m0[0]) as Set;
+
+	// Execute first traversal of m0 to get
+	// the list of functions to consider
+
+	X = [] as Set;		
+	X = m0[0].functionId.toList() as Set;
 	m0.remove(0)
-
-	m0.each{ x = x.intersect( execTraversal(it) as Set ); }	
-	y = [] as Set; m1.each{ y = y + ( execTraversal(it) as Set) }
 	
-	x.minus(y)
+	// Execute all remaining traversals on m0
+	// using the nodes returned by the previous
+	// traversal as a limiting set.
+
+	m0.each{
+		o = {it in X}
+		newNodes = it(outputPredicate = o).functionId.toList() as Set
+		X = X.intersect( newNodes );
+	}
+	
+	m1.each{
+		o = {it in X}
+		Y = ( it(outputPredicate = o)  as Set)
+		X = X.minus(y)
+	}
+	
+	X
 }
 
-
-Object.metaClass.Pairs = { t1, t2 ->
-	
-}
