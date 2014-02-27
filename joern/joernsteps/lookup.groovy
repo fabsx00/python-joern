@@ -1,10 +1,12 @@
 /**
    This module contains index lookup functions employed to provide
    start node sets for traversals. All of these lookups support wild
-   cards (you will need to escape spaces though) and output predicates
-   to filter output nodes. Since lookup functions are the start of all
-   traversals, output predicates can be used to filter nodes before
-   the rest of the traversal is executed.
+   cards (you will need to escape spaces though).
+
+   For each index lookup function, we define a corresponding Gremlin
+   step with the same name which performs the same action as the
+   lookup-function but returns only matches occuring in the same
+   functions as the nodes piped to it.
 */
 
 
@@ -13,32 +15,24 @@
    
    @param query The lucene query to run
    
-   @param outputFilter An optional boolean function to filter returned
-   nodes.
 */
 
-Object.metaClass.queryNodeIndex = { query, outputPredicate = {true} ->
+Object.metaClass.queryNodeIndex = { query ->
 	index = g.getRawGraph().index().forNodes(NODE_INDEX)
 	new Neo4jVertexSequence(index.query(query), g)._()
-	.filter(outputPredicate)
 }
 
 /**
    Retrieve nodes with given type and code.
    
    @param type The node type
-   
    @param code The node code
-
-   @param outputFilter An optional boolean function to filter returned
-   nodes.
    
 */
 
-Object.metaClass.getNodesWithTypeAndCode = { type, code, outputPredicate = { true } ->
+Object.metaClass.getNodesWithTypeAndCode = { type, code ->
 	query = "$NODE_TYPE:$type AND $NODE_CODE:$code"
-	queryNodeIndex(query, outputPredicate)
-	.filter(outputPredicate)
+	queryNodeIndex(query)
 }
 
 
@@ -46,47 +40,34 @@ Object.metaClass.getNodesWithTypeAndCode = { type, code, outputPredicate = { tru
    Retrieve nodes with given type and name.
    
    @param type The node type
-   
    @param name The node name
-
-   @param outputFilter An optional boolean function to filter returned
-   nodes.
    
 */
 
-Object.metaClass.getNodesWithTypeAndName = { type, name, outputPredicate = { true } ->
+Object.metaClass.getNodesWithTypeAndName = { type, name ->
 	query = "$NODE_TYPE:$type AND $NODE_NAME:$name"
-	queryNodeIndex(query, outputPredicate)
-	.filter(outputPredicate)
+	queryNodeIndex(query)
 }
-
 
 /**
    Retrieve functions by name.
    
    @param name name of the function
-
-   @param outputFilter An optional boolean function to filter returned
-   nodes.
    
 */
 
-Object.metaClass.getFunctionsByName = { name, outputPredicate = { true } ->
+Object.metaClass.getFunctionsByName = { name ->
 	getNodesWithTypeAndName(TYPE_FUNCTION, name)
-	.filter(outputPredicate)
 }
 
 /**
    Retrieve calls by name.
    
    @param callee Name of called function
-
-   @param outputFilter An optional boolean function to filter returned
-   nodes.
    
 */
 
-Object.metaClass.getCallsTo = { callee, outputPredicate = { true } ->
+Object.metaClass.getCallsTo = { callee ->
 	getNodesWithTypeAndCode(TYPE_CALLEE, callee)
 	.parents()
 }
@@ -96,60 +77,60 @@ Object.metaClass.getCallsTo = { callee, outputPredicate = { true } ->
    'ARG' from the paper. 
    
    @param name Name of called function
-
    @param i Argument index
-
-   @param outputFilter An optional boolean function to filter returned
-   nodes.
    
 */
 
-Object.metaClass.getArguments = { name, i, outputPredicate = { true } ->
+Object.metaClass.getArguments = { name, i ->
 	getCallsTo(name).ithArguments(i)
-	.filter(outputPredicate)
 }
+
+  /////////////////////////////////////////////////
+ //     Corresponding Gremlin Steps             //
+/////////////////////////////////////////////////
+
+Gremlin.defineStep('queryNodeIndex', [Vertex,Pipe], { query, c = [] ->
+	_()._emitForFunctions({ queryNodeIndex(query) }, c )
+})
+
+Gremlin.defineStep('getNodesWithTypeAndCode', [Vertex,Pipe], { type, code, c = [] ->
+	_()._emitForFunctions({ getNodesWithTypeAndCode(type, code) }, c )
+})
+
+Gremlin.defineStep('getNodesWithTypeAndName', [Vertex,Pipe], { type, name, c = [] ->
+	_()._emitForFunctions({ getNodesWithTypeAndName(type, name) }, c )
+})
+
+Gremlin.defineStep('getFunctionsByName', [Vertex,Pipe], { name, c = [] ->
+	_()._emitForFunctions({ getFunctionsByName(name) }, c )
+})
+
+Gremlin.defineStep('getCallsTo', [Vertex,Pipe], { callee, c = [] ->
+	_()._emitForFunctions({ getCallsTo(callee) }, c )
+})
+
+Gremlin.defineStep('getArguments', [Vertex,Pipe], { name, i, c = [] ->
+	_()._emitForFunctions({ getArguments(name, i) }, c )
+})
 
 /**
-  Retrieve functions matching all traversals in m0 and none of the
-  traversals in m1. Note that traversals are executed in the order
-  specified, so its best to order traversals such that those
-  traversals reducing the number of functions most drastically are
-  specified first.
+	Executes closure cl which is expected to return a pipe of
+	nodes. Returns a pipe containing all of these nodes which
+	match the boolean predicate `c`.
 
-  @params m0 A list of traversals that must match.
-  @params m1 A list of traversals that must not match.
-
-  @returns Pipe containg functionIds or an empty pipe if m0 is empty.
-
+	@param cl closure to execute
+	@param c  predicate to evaluate on nodes returned by cl.
 */
 
-Object.metaClass.functionsMatching = { m0, m1 ->
-	
-	if(m0.size() == 0) return [];
+Gremlin.defineStep('_emitForFunctions', [Vertex,Pipe], {
+	Closure cl, c ->
 
-	// Execute first traversal of m0 to get
-	// the list of functions to consider
-
-	X = [] as Set;		
-	X = m0[0].functionId.toList() as Set;
-	m0.remove(0)
+	if(c == [])
+		c = {it.functionId in ids}
 	
-	// Execute all remaining traversals on m0
-	// using the nodes returned by the previous
-	// traversal as a limiting set.
-
-	m0.each{
-		o = {it in X}
-		newNodes = it(outputPredicate = o).functionId.toList() as Set
-		X = X.intersect( newNodes );
-	}
-	
-	m1.each{
-		o = {it in X}
-		Y = ( it(outputPredicate = o)  as Set)
-		X = X.minus(y)
-	}
-	
-	X
-}
-
+	_().functionId.gather()
+	.transform{
+		ids = it;
+		cl().filter(c)
+	}.scatter()
+})
