@@ -41,3 +41,8 @@ Object.metaClass.functionsMatching = { m0, m1 ->
 	
 	x.minus(y)
 }
+
+
+Object.metaClass.Pairs = { t1, t2 ->
+	
+}
