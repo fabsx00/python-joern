@@ -20,49 +20,42 @@ class IndexLookupTests(PythonJoernTests):
 
         query = 'getNodesWithTypeAndCode("Callee", "bar")'
         x = self.j.runGremlinQuery(query)
-        self.assertTrue(len(x) == 1)
+        self.assertEquals(len(x), 1)
 
     def testGetNodesWithTypeAndName(self):
 
         query = 'getNodesWithTypeAndName("Function", "foo")'
         x = self.j.runGremlinQuery(query)
-        self.assertTrue(len(x) == 1)
+        self.assertEquals(len(x), 1)
         
     def testGetFunctionsByName(self):
         
         query = 'getFunctionsByName("foo")'
         x = self.j.runGremlinQuery(query)
-        self.assertTrue(len(x) == 1)
+        self.assertEquals(len(x), 1)
 
     def testGetCallsTo(self):
         
-        query = 'getCallsTo("bar", {true})'
+        query = 'getCallsTo("bar")'
         x = self.j.runGremlinQuery(query)
         self.assertTrue(len(x) == 1)
 
-    # def testGetArguments(self):
+    def testGetArguments(self):
         
-    #     query = 'getArguments("bar", "0").code'
-    #     x = self.j.runGremlinQuery(query)
-    #     self.assertEquals(x[0], 'y')
-
-    
-    # def testFunctionsMatching(self):
-        
-    #     query = "getCallsTo('bar', {it.id != 43} )"
-    #     x = self.j.runGremlinQuery(query)
-    #     print x
-
-        # query = 'functionsMatching([getCallsTo("foo"), getCallsTo("bar")], [])'
-        # x = self.j.runGremlinQuery(query)
-        # print x
-
+        query = 'getArguments("bar", "0").code'
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(x[0], 'y')
 
 
 class SyntaxOnlyTests(PythonJoernTests):
-    pass
     
-    
+    def testSyntaxOnlyChaining(self):
+        
+        # functions calling foo AND bar
+        
+        query = "getCallsTo('foo').getCallsTo('bar')"
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(len(x), 1)
     
 
 if __name__ == '__main__':
