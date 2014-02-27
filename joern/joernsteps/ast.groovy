@@ -47,7 +47,7 @@ Gremlin.defineStep('children', [Vertex, Pipe], {
 /**
    Traverse to i'th children.
    
-   @param i The child number to traverse to.
+   @param i The child index
 */
 
 Gremlin.defineStep('ithChildren', [Vertex, Pipe], { i ->
