@@ -57,6 +57,14 @@ class SyntaxOnlyTests(PythonJoernTests):
         x = self.j.runGremlinQuery(query)
         self.assertEquals(len(x), 1)
     
+    def testSyntaxOnlyChainingInvert(self):
+        
+        # functions calling foo AND NOT bar
+        
+        query = "getCallsTo('foo').not( { getCallsTo('bar') } )"
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(len(x), 5)
+    
 
 if __name__ == '__main__':
     unittest.main()

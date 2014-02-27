@@ -134,3 +134,14 @@ Gremlin.defineStep('_emitForFunctions', [Vertex,Pipe], {
 		cl().filter(c)
 	}.scatter()
 })
+
+
+Gremlin.defineStep('not', [Vertex,Pipe], { cl, c = [] ->
+	
+	X = []; Y = []
+	_().aggregate(X)
+	._emitForFunctions(cl, c)
+	.functionId.aggregate(Y)
+	.transform{ X }.scatter().filter{ !(it.functionId in Y) }
+})
+
