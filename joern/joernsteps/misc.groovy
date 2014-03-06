@@ -25,5 +25,5 @@ Gremlin.defineStep('idsToNodes', [Vertex,Pipe], {
  */
 
 Object.metaClass.matches = { v, traversal ->
-  v.traversal.toList() != []
+  v._().traversal.toList() != []
 }

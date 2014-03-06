@@ -7,7 +7,7 @@
 */
 
 Gremlin.defineStep('producers', [Vertex,Pipe], { N ->
-	_().statements().in(DATA_FLOW_EDGE, DATA_FLOW_SYMBOL, N )
+	_().statements().In(DATA_FLOW_EDGE, DATA_FLOW_SYMBOL, N )
 })
 
 /**
@@ -29,11 +29,11 @@ Gremlin.defineStep('sources', [Vertex,Pipe], {
 */
 
 Gremlin.defineStep('unsanitized', [Vertex, Pipe], { sanitizer ->
-  _().uPath(sanitizer).firstElem
+  _().uPath(sanitizer).firstElem()
 })
 
 Gremlin.defineStep('firstElem', [Vertex, Pipe], {
-	_().transform{ it[0] }
+  _().transform{ if(it.isEmpty()) null; else it[0] }
 })	
 
 /**
@@ -47,9 +47,9 @@ Gremlin.defineStep('firstElem', [Vertex, Pipe], {
 
 Gremlin.defineStep('uPath', [Vertex, Pipe], { sanitizer ->
   _().sideEffect{ dst = it; }
-  .used().sideEffect{ symbol = it.code }
-  .transform{ dst.producers([s]) }.scatter()
-  .transform{ cfgPaths(symbol, sanitizer, it, d) }
+  .uses().sideEffect{ symbol = it.code }
+  .transform{ dst.producers([symbol]) }.scatter()
+  .transform{ cfgPaths(symbol, sanitizer, it, dst) }
 })
 
 /**
@@ -83,7 +83,7 @@ _cfgPaths = { symbol, sanitizer, curNode, dst, visited, path ->
   if(curNode == dst) return [path << curNode] as Set
   
   // return an empty set if this node is a sanitizer
-  if(m(curNode)) return [] as Set
+  if(i_m(curNode, visited)) return [] as Set
 
   // `h` in the paper is inlined here
   
@@ -111,7 +111,7 @@ _cfgPaths = { symbol, sanitizer, curNode, dst, visited, path ->
 
 isTerminationNode = { symbol, sanitizer, curNode, visited -> 
   
-  matches(sanitizer) ||
-  matches(curNode.defines().filter{ it.code = symbol}) ||
+  matches(curNode, sanitizer) ||
+  matches(curNode, defines().filter{ it.code = symbol}) ||
   (visited[curNode.id] == 2)
 }

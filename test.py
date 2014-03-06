@@ -84,6 +84,33 @@ class DataFlowTests(PythonJoernTests):
         x = self.j.runGremlinQuery(query)
         self.assertEquals(len(x), 1)
 
+    def testProducers(self):
+        query = """ getFunctionsByName('ddg_simplest_test')
+        .getCallsTo('foo')
+        .statements()
+        .producers(['x'])
+        """
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(len(x), 1)
+
+    def testProducersNegative(self):
+        query = """ getFunctionsByName('ddg_simplest_test')
+        .getCallsTo('foo')
+        .statements()
+        .producers([''])
+        """
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(len(x), 0)
+
+    def testUnsanitized(self):
+        query = """ getFunctionsByName('ddg_simplest_test')
+        .getCallsTo('foo')
+        .statements()
+        .unsanitized{ _().transform{ [] } }
+        """
+        x = self.j.runGremlinQuery(query)
+        print x
+
 if __name__ == '__main__':
     unittest.main()
     
