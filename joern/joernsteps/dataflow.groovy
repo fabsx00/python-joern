@@ -29,7 +29,7 @@ Gremlin.defineStep('sources', [Vertex,Pipe], {
 */
 
 Gremlin.defineStep('unsanitized', [Vertex, Pipe], { sanitizer ->
-  _().uPath(sanitizer).firstElem()
+  _().uPath(sanitizer) //.firstElem()
 })
 
 Gremlin.defineStep('firstElem', [Vertex, Pipe], {
@@ -50,6 +50,7 @@ Gremlin.defineStep('uPath', [Vertex, Pipe], { sanitizer ->
   .uses().sideEffect{ symbol = it.code }
   .transform{ dst.producers([symbol]) }.scatter()
   .transform{ cfgPaths(symbol, sanitizer, it, dst) }
+  
 })
 
 /**
@@ -64,7 +65,7 @@ Gremlin.defineStep('uPath', [Vertex, Pipe], { sanitizer ->
 */
 
 cfgPaths = { symbol, sanitizer, src, dst ->
-  _cfgPaths(symbol, sanitizer,
+  _cfgPaths(src, symbol, sanitizer,
 	    src, dst, [:].withDefault{ k -> 0}, [])
 }
 
@@ -75,28 +76,30 @@ cfgPaths = { symbol, sanitizer, src, dst ->
 
 */
 
-_cfgPaths = { symbol, sanitizer, curNode, dst, visited, path ->
+_cfgPaths = {src,  symbol, sanitizer, curNode, dst, visited, path ->
   
-  i_m = isTerminationNode.curry(symbol, sanitizer)
   
   // return path when destination has been reached
   if(curNode == dst) return [path << curNode] as Set
   
+  i_m = isTerminationNode.curry(symbol, sanitizer)
+  
   // return an empty set if this node is a sanitizer
-  if(i_m(curNode, visited)) return [] as Set
+  if( (curNode != src) && i_m(curNode, visited)) return [] as Set
 
   // `h` in the paper is inlined here
   
-  children = curNode._().out(CFG_EDGE)
+  children = curNode._().out(CFG_EDGE).toList()
 
-  X = children.each{
-    i_cfgPaths(symbol, sanitizer, i_m, it, dst, 
+  X = [] as Set
+
+  children.each{
+    X += 
+    _cfgPaths(src, symbol, sanitizer, it, dst, 
 	       visited << [ (curNode.id) : (visited[curNode] + 1) ],
-	       path + curNode.id)
-  } as Set
-  
-  X.inject{ x,y -> x + y}
-  
+	       path + curNode)
+  }
+  X
 }
 
 /**
@@ -111,7 +114,7 @@ _cfgPaths = { symbol, sanitizer, curNode, dst, visited, path ->
 
 isTerminationNode = { symbol, sanitizer, curNode, visited -> 
   
-  matches(curNode, sanitizer) ||
-  matches(curNode, defines().filter{ it.code = symbol}) ||
+  sanitizer(curNode) != [] ||
+  (curNode.defines().filter{ it.code == symbol}.toList() != []) ||
   (visited[curNode.id] == 2)
 }

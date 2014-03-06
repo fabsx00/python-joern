@@ -18,12 +18,3 @@ Gremlin.defineStep('In', [Vertex, Pipe], { edgeType, key, vals ->
 Gremlin.defineStep('idsToNodes', [Vertex,Pipe], {
 	_().transform{ g.v(it) }.scatter()
 })
-
-/**
-   Apply traversal to single node 'v' and return true if the traversal
-   returns a non-empty set, i.e., it "matches".
- */
-
-Object.metaClass.matches = { v, traversal ->
-  v._().traversal.toList() != []
-}

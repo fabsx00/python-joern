@@ -102,14 +102,12 @@ class DataFlowTests(PythonJoernTests):
         x = self.j.runGremlinQuery(query)
         self.assertEquals(len(x), 0)
 
-    def testUnsanitized(self):
-        query = """ getFunctionsByName('ddg_simplest_test')
-        .getCallsTo('foo')
-        .statements()
-        .unsanitized{ _().transform{ [] } }
+    def testCfgPaths(self):
+        query = """
+        cfgPaths('x', { [] } , g.v(499), g.v(492) )
         """
         x = self.j.runGremlinQuery(query)
-        print x
+        self.assertEquals(len(x[0]), 2)
 
 if __name__ == '__main__':
     unittest.main()
