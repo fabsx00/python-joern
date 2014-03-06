@@ -1,5 +1,7 @@
 
-// Traverals starting at function nodes
+/**
+   (Optimized) match-traversals for functions.
+*/
 
 Gremlin.defineStep("functionToAST", [Vertex,Pipe], {
 	_().out(FUNCTION_TO_AST_EDGE)

@@ -1,5 +1,5 @@
 /**
-   Traversals starting at AST nodes.
+   Elementrary traversals starting at AST nodes.
 */
 
 /** 
@@ -72,5 +72,3 @@ Gremlin.defineStep('statements', [Vertex,Pipe],{
 Gremlin.defineStep('functions', [Vertex,Pipe],{
 	_().functionId.idToNode()
 });
-
-

@@ -65,7 +65,7 @@ class CompositionTests(PythonJoernTests):
         x = self.j.runGremlinQuery(query)
         self.assertEquals(len(x), 5)
     
-    def testTuplesComposition(self):
+    def testPairsComposition(self):
         
        query = """queryNodeIndex('type:AssignmentExpr AND code:"x = bar ( y )"')
        .pairs( _().lval().code, _().rval().code)"""
