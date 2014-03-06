@@ -29,11 +29,19 @@ Gremlin.defineStep('sources', [Vertex,Pipe], {
 */
 
 Gremlin.defineStep('unsanitized', [Vertex, Pipe], { sanitizer ->
-  _().uPath(sanitizer) //.firstElem()
+  _().uPath(sanitizer).firstElem()
 })
 
 Gremlin.defineStep('firstElem', [Vertex, Pipe], {
-  _().transform{ if(it.isEmpty()) null; else it[0] }
+	_().transform{
+		
+		X = []
+		it.each(){
+			if(it.isEmpty()) X += [null];
+			else X += it[0]
+		}
+		X
+	}
 })	
 
 /**
