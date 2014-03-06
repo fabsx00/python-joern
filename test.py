@@ -73,6 +73,17 @@ class CompositionTests(PythonJoernTests):
        self.assertEquals(x[0][0], "x")
        self.assertEquals(x[0][1], "bar ( y )")
 
+class DataFlowTests(PythonJoernTests):
+    
+    def testSources(self):
+        query = """ getFunctionsByName('ddg_simplest_test')
+        .getCallsTo('foo')
+        .statements()
+        .sources().code
+        """
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(len(x), 1)
+
 if __name__ == '__main__':
     unittest.main()
     

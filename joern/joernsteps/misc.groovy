@@ -1,5 +1,5 @@
 
-Gremlin.defineStep('in', [Vertex, Pipe], { edgeType, key, vals ->
+Gremlin.defineStep('In', [Vertex, Pipe], { edgeType, key, vals ->
 	
 	if(Collection.isAssignableFrom(vals.getClass())){
 		filterExpr = { it.getProperty(key) in vals }		
