@@ -92,16 +92,25 @@ Object.metaClass._cfgPaths = {symbol, sanitizer, curNode, dst, visited, path ->
   
   def children = curNode._().out(CFG_EDGE).toList()
   def X = [] as Set
-  
-  children.each{
+  def x;
+
+  for(child in children){
       
     def curNodeId = curNode.toString()
     
+    x = _cfgPaths(symbol, sanitizer, child, dst,
+		  visited + [ (curNodeId) : (visited.get(curNodeId, 0) + 1)],
+		  path + curNode)  
     
-    X += _cfgPaths(symbol, sanitizer, it, dst,
-		   visited + [ (curNodeId) : (visited.get(curNodeId, 0) + 1)],
-		   path + curNode)  
+
+    X += x
+
+    // OPTIMIZATION!
+    // If we find one path, there's no need to explore the others
+    if(!x.isEmpty()){ return x }
+    
   }
+
   X
 }
 
