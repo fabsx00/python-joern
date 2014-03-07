@@ -33,15 +33,7 @@ Gremlin.defineStep('unsanitized', [Vertex, Pipe], { sanitizer ->
 })
 
 Gremlin.defineStep('firstElem', [Vertex, Pipe], {
-	_().transform{
-		
-		X = []
-		it.each(){
-			if(it.isEmpty()) X += [null];
-			else X += it[0]
-		}
-		X
-	}
+	_().transform{it[0]}
 })	
 
 /**
@@ -57,7 +49,7 @@ Gremlin.defineStep('uPath', [Vertex, Pipe], { sanitizer ->
   _().sideEffect{ dst = it; }
   .uses().sideEffect{ symbol = it.code }
   .transform{ dst.producers([symbol]) }.scatter()
-  .transform{ cfgPaths(symbol, sanitizer, it, dst) }
+  .transform{ cfgPaths(symbol, sanitizer, it, dst) }.scatter()
   
 })
 
@@ -74,7 +66,7 @@ Gremlin.defineStep('uPath', [Vertex, Pipe], { sanitizer ->
 
 cfgPaths = { symbol, sanitizer, src, dst ->
   _cfgPaths(symbol, sanitizer,
-	    src, dst, [:].withDefault{ k -> 0}, [])
+	    src, dst, [:], [])
 }
 
 /**
@@ -84,32 +76,31 @@ cfgPaths = { symbol, sanitizer, src, dst ->
 
 */
 
-_cfgPaths = {symbol, sanitizer, curNode, dst, visited, path ->
-  
-  println visited
-  println path
+Object.metaClass._cfgPaths = {symbol, sanitizer, curNode, dst, visited, path ->
   
   // return path when destination has been reached
-  if(curNode == dst)
+  if(curNode == dst){
     return [path + curNode] as Set
-    
-  i_m = isTerminationNode.curry(symbol, sanitizer)
+  }
   
-
   // return an empty set if this node is a sanitizer
-  if( ( path != [] ) && i_m(curNode, visited)) return [] as Set
-
+  if( ( path != [] ) && isTerminationNode(symbol, sanitizer, curNode, visited)){
+    return [] as Set
+  }
+  
   // `h` in the paper is inlined here
   
-  children = curNode._().out(CFG_EDGE).toList()
-
-  X = [] as Set
+  def children = curNode._().out(CFG_EDGE).toList()
+  def X = [] as Set
   
   children.each{
-    X += 
-    _cfgPaths(symbol, sanitizer, it, dst,
-	      visited + [ (curNode.id) : (visited[curNode.id] + 1) ],
-	      path + curNode)
+      
+    def curNodeId = curNode.toString()
+    
+    
+    X += _cfgPaths(symbol, sanitizer, it, dst,
+		   visited + [ (curNodeId) : (visited.get(curNodeId, 0) + 1)],
+		   path + curNode)  
   }
   X
 }
@@ -126,7 +117,9 @@ _cfgPaths = {symbol, sanitizer, curNode, dst, visited, path ->
 
 isTerminationNode = { symbol, sanitizer, curNode, visited -> 
   
+  def curNodeId = curNode.toString()
+  
   sanitizer(curNode) != [] ||
   (curNode.defines().filter{ it.code == symbol}.toList() != []) ||
-  (visited[curNode.id] == 2)
+  (visited.get(curNodeId) == 2)
 }
