@@ -57,8 +57,7 @@ Object.metaClass.getNodesWithTypeAndName = { type, name ->
 */
 
 Object.metaClass.getFunctionsByName = { name ->
-	getNodesWithTypeAndName(TYPE_FUNCTION, name).
-	sideEffect{ it.functionId = it.id }
+	getNodesWithTypeAndName(TYPE_FUNCTION, name)
 }
 
 /**
