@@ -104,7 +104,7 @@ _cfgPaths = {src,  symbol, sanitizer, curNode, dst, visited, path ->
   children.each{
     X += 
     _cfgPaths(src, symbol, sanitizer, it, dst, 
-	       visited << [ (curNode.id) : (visited[curNode] + 1) ],
+	       visited << [ (curNode.id) : (visited[curNode.id] + 1) ],
 	       path + curNode)
   }
   X

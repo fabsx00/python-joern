@@ -61,6 +61,18 @@ Object.metaClass.getFunctionsByName = { name ->
 }
 
 /**
+   Retrieve functions by name.
+   
+   @param name name of the function
+   
+*/
+
+Object.metaClass.getFunctionASTsByName = { name ->
+	getNodesWithTypeAndName(TYPE_FUNCTION, name)
+	.out(FUNCTION_TO_AST_EDGE)
+}
+
+/**
    Retrieve calls by name.
    
    @param callee Name of called function
