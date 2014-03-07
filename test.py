@@ -76,7 +76,7 @@ class CompositionTests(PythonJoernTests):
 class DataFlowTests(PythonJoernTests):
     
     def testSources(self):
-        query = """ getFunctionsByName('ddg_simplest_test')
+        query = """getFunctionASTsByName('ddg_simplest_test')
         .getCallsTo('foo')
         .statements()
         .sources().code
@@ -85,7 +85,7 @@ class DataFlowTests(PythonJoernTests):
         self.assertEquals(len(x), 1)
 
     def testProducers(self):
-        query = """ getFunctionsByName('ddg_simplest_test')
+        query = """ getFunctionASTsByName('ddg_simplest_test')
         .getCallsTo('foo')
         .statements()
         .producers(['x'])
@@ -94,7 +94,7 @@ class DataFlowTests(PythonJoernTests):
         self.assertEquals(len(x), 1)
 
     def testProducersNegative(self):
-        query = """ getFunctionsByName('ddg_simplest_test')
+        query = """ getFunctionASTsByName('ddg_simplest_test')
         .getCallsTo('foo')
         .statements()
         .producers([''])
@@ -106,10 +106,10 @@ class DataFlowTests(PythonJoernTests):
                 
         query = """
         
-        dstNode = getFunctionsByName('ddg_simplest_test')
+        dstNode = getFunctionASTsByName('ddg_simplest_test')
         .getCallsTo('foo').statements().toList()[0]
 
-        srcNode = getFunctionsByName('ddg_simplest_test')
+        srcNode = getFunctionASTsByName('ddg_simplest_test')
         .getNodesWithTypeAndCode('AssignmentExpr', '*').statements().toList()[0]
         
         cfgPaths('x', { [] } , srcNode, dstNode )
@@ -120,7 +120,7 @@ class DataFlowTests(PythonJoernTests):
     def testUnsanitized(self):
         query = """
         
-        getFunctionsByName('ddg_simplest_test')
+        getFunctionASTsByName('ddg_simplest_test')
         .getCallsTo('foo')
         .statements()
         .unsanitized({[]})

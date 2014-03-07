@@ -73,7 +73,7 @@ Gremlin.defineStep('uPath', [Vertex, Pipe], { sanitizer ->
 */
 
 cfgPaths = { symbol, sanitizer, src, dst ->
-  _cfgPaths(src, symbol, sanitizer,
+  _cfgPaths(symbol, sanitizer,
 	    src, dst, [:].withDefault{ k -> 0}, [])
 }
 
@@ -84,28 +84,32 @@ cfgPaths = { symbol, sanitizer, src, dst ->
 
 */
 
-_cfgPaths = {src,  symbol, sanitizer, curNode, dst, visited, path ->
+_cfgPaths = {symbol, sanitizer, curNode, dst, visited, path ->
   
+  println visited
+  println path
   
   // return path when destination has been reached
-  if(curNode == dst) return [path << curNode] as Set
-  
+  if(curNode == dst)
+    return [path + curNode] as Set
+    
   i_m = isTerminationNode.curry(symbol, sanitizer)
   
+
   // return an empty set if this node is a sanitizer
-  if( (curNode != src) && i_m(curNode, visited)) return [] as Set
+  if( ( path != [] ) && i_m(curNode, visited)) return [] as Set
 
   // `h` in the paper is inlined here
   
   children = curNode._().out(CFG_EDGE).toList()
 
   X = [] as Set
-
+  
   children.each{
     X += 
-    _cfgPaths(src, symbol, sanitizer, it, dst, 
-	       visited << [ (curNode.id) : (visited[curNode.id] + 1) ],
-	       path + curNode)
+    _cfgPaths(symbol, sanitizer, it, dst,
+	      visited + [ (curNode.id) : (visited[curNode.id] + 1) ],
+	      path + curNode)
   }
   X
 }
