@@ -63,7 +63,7 @@ class CompositionTests(PythonJoernTests):
         
         query = "getCallsTo('foo').not{getCallsTo('bar')}"
         x = self.j.runGremlinQuery(query)
-        self.assertEquals(len(x), 5)
+        self.assertEquals(len(x), 6)
     
     def testPairsComposition(self):
         
@@ -72,6 +72,27 @@ class CompositionTests(PythonJoernTests):
        x = self.j.runGremlinQuery(query)
        self.assertEquals(x[0][0], "x")
        self.assertEquals(x[0][1], "bar ( y )")
+
+class UDGTests(PythonJoernTests):
+    
+    def testComplexArg(self):
+        
+        query = """getFunctionASTsByName('complexInArgs')
+        .astNodes().filter{ it.type == 'Argument'}
+        .uses().code
+        """
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(len(x), 3)
+
+    def testComplexAssign(self):
+        
+        query = """getFunctionASTsByName('complexAssign')
+        .astNodes().filter{ it.type == 'AssignmentExpr'}
+        .defines().code
+        """
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(x[0], 'pLtv -> u . u16')
+
 
 class DataFlowTests(PythonJoernTests):
     

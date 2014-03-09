@@ -28,7 +28,7 @@ Gremlin.defineStep('sources', [Vertex,Pipe], {
 
 */
 
-Gremlin.defineStep('unsanitized', [Vertex, Pipe], { sanitizer, src = { [1]._() } ->
+Gremlin.defineStep('unsanitized', [Vertex, Pipe], { sanitizer, src = { [1]._() }  ->
   _().uPath(sanitizer, src).firstElem()
 })
 
@@ -50,7 +50,7 @@ Gremlin.defineStep('uPath', [Vertex, Pipe], { sanitizer, src = { [1]._() } ->
   .uses().sideEffect{ symbol = it.code }
   .transform{ dst.producers([symbol]) }.scatter()
   .filter{ src(it).toList() != [] }
-  .transform{ cfgPaths(symbol, sanitizer, it, dst) }.scatter()
+  .transform{ cfgPaths(symbol, sanitizer, it, dst.statements().toList()[0] ) }.scatter()
   
 })
 
