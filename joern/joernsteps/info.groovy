@@ -8,7 +8,7 @@ Gremlin.defineStep('locations', [Vertex,Pipe], {
 })
 
 Gremlin.defineStep('functions', [Vertex,Pipe],{
-	_().functionId.idToNode()
+	_().functionId.idsToNodes()
 });
 
 Gremlin.defineStep("functionToFiles", [Vertex,Pipe], {

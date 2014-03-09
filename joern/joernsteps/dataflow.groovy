@@ -22,14 +22,14 @@ Gremlin.defineStep('sources', [Vertex,Pipe], {
 /**
    For a set of destination nodes: all paths in the control flow graph
    from data sources where no node on the path redefines the produced
-   symbol and not node on the path matches a sanitizer description.
+   symbol and no node on the path matches a sanitizer description.
    
    @return A pipe containing valid source nodes
 
 */
 
-Gremlin.defineStep('unsanitized', [Vertex, Pipe], { sanitizer ->
-  _().uPath(sanitizer).firstElem()
+Gremlin.defineStep('unsanitized', [Vertex, Pipe], { sanitizer, src = { [1]._() } ->
+  _().uPath(sanitizer, src).firstElem()
 })
 
 Gremlin.defineStep('firstElem', [Vertex, Pipe], {
@@ -45,10 +45,11 @@ Gremlin.defineStep('firstElem', [Vertex, Pipe], {
    
 */
 
-Gremlin.defineStep('uPath', [Vertex, Pipe], { sanitizer ->
+Gremlin.defineStep('uPath', [Vertex, Pipe], { sanitizer, src = { [1]._() } ->
   _().sideEffect{ dst = it; }
   .uses().sideEffect{ symbol = it.code }
   .transform{ dst.producers([symbol]) }.scatter()
+  .filter{ src(it).toList() != [] }
   .transform{ cfgPaths(symbol, sanitizer, it, dst) }.scatter()
   
 })
@@ -128,7 +129,7 @@ isTerminationNode = { symbol, sanitizer, curNode, visited ->
   
   def curNodeId = curNode.toString()
   
-  sanitizer(curNode) != [] ||
+  sanitizer(curNode).toList() != [] ||
   (curNode.defines().filter{ it.code == symbol}.toList() != []) ||
   (visited.get(curNodeId) == 2)
 }
