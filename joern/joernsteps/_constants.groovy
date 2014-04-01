@@ -6,6 +6,7 @@ NODE_INDEX = 'nodeIndex'
 NODE_TYPE = 'type'
 NODE_NAME = 'name'
 NODE_CODE = 'code'
+NODE_FILEPATH = 'filepath'
 
 // Node Values
 
@@ -16,6 +17,8 @@ TYPE_ASSIGNMENT = 'AssignmentExpr'
 
 TYPE_IDENTIFIER_DECL_STMT = 'IdentifierDeclStatement'
 TYPE_PARAMETER = 'Parameter'
+
+TYPE_FILE = 'File'
 
 // Edge types
 
