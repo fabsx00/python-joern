@@ -62,7 +62,6 @@ Object.metaClass.getFunctionsByName = { name ->
 
 Object.metaClass.getFunctionsByFilename = { name ->
 	query = "$NODE_TYPE:$TYPE_FILE AND $NODE_FILEPATH:$name"
-	println query
 	queryNodeIndex(query)
 	.out('IS_FILE_OF')
 	.filter{ it.type == TYPE_FUNCTION }
