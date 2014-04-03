@@ -84,6 +84,17 @@ class UDGTests(PythonJoernTests):
         x = self.j.runGremlinQuery(query)
         self.assertEquals(len(x), 3)
 
+    def testStatementContainingCall(self):
+        
+        query = """getFunctionASTsByName('complexInArgs')
+        .astNodes().filter{ it.type == 'Argument'}
+        .statements()
+        .uses().code
+        """
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(len(x), 4)
+        
+
     def testComplexAssign(self):
         
         query = """getFunctionASTsByName('complexAssign')
