@@ -21,3 +21,6 @@ Gremlin.defineStep("functionsToASTNodesOfType", [Vertex,Pipe],{ type ->
 	 .scatter()
 })
 
+Gremlin.defineStep('functionToFile', [Vertex, Pipe], {
+	_().in(FILE_TO_FUNCTION_EDGE)
+})
