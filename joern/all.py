@@ -52,10 +52,10 @@ class JoernSteps:
     def _createInitCommand(self):
         
         initCommand = ""
-        for (root, dirs, files) in os.walk(self.stepsDir):
+        for (root, dirs, files) in os.walk(self.stepsDir, followlinks=True):
             files.sort()
             for f in files:
-                filename = root + f
+                filename = os.path.join(root, f)
                 if not filename.endswith('.groovy'): continue
                 initCommand += file(filename).read() + "\n"
         return initCommand
