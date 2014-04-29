@@ -15,9 +15,11 @@ class JoernSteps:
         """ Sets the graph database URL. By default,
         http://localhost:7474/db/data/ is used."""
         self.graphDbURL = url
-        
-    def setStepsDir(self, stepsDir):
-        self.stepsDir = stepsDir
+    
+    def addStepsDir(self, stepsDir):
+        """Add an additional directory containing steps to be injected
+        into the server"""
+        self.stepsDirs.append(stepsDir)
     
     def connectToDatabase(self):
         """ Connects to the database server."""
@@ -47,15 +49,17 @@ class JoernSteps:
 
     def _initJoernSteps(self):
         self.graphDbURL = DEFAULT_GRAPHDB_URL
-        self.stepsDir = DEFAULT_STEP_DIR
+        self.stepsDirs = [DEFAULT_STEP_DIR]
 
     def _createInitCommand(self):
         
         initCommand = ""
-        for (root, dirs, files) in os.walk(self.stepsDir, followlinks=True):
-            files.sort()
-            for f in files:
-                filename = os.path.join(root, f)
-                if not filename.endswith('.groovy'): continue
-                initCommand += file(filename).read() + "\n"
+
+        for stepsDir in self.stepsDirs:
+            for (root, dirs, files) in os.walk(stepsDir, followlinks=True):
+                files.sort()
+                for f in files:
+                    filename = os.path.join(root, f)
+                    if not filename.endswith('.groovy'): continue
+                    initCommand += file(filename).read() + "\n"
         return initCommand
