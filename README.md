@@ -37,7 +37,7 @@ j = JoernSteps()
 
 j.setGraphDbURL('http://localhost:7474/db/data/')
 
-# j.setStepsDir('Use this to inject custom steps')
+# j.addStepsDir('Use this to inject custom steps')
 
 j.connectToDatabase()
 
