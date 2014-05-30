@@ -175,14 +175,22 @@ class ControlFlowTests(PythonJoernTests):
 
     def testIf(self):
         query = """queryNodeIndex('type:Function AND name:if_test')
-        .functionsToASTNodesOfType('Condition')
+        .functionsToASTNodesOfType('Condition').filter{it.code == 'arg1'}
         .outE('FLOWS_TO').flowLabel
         """
         x = self.j.runGremlinQuery(query)
-        self.assertEquals(len(x), 4)
+        self.assertEquals(len(x), 2)
+        self.assertIn('False', x)
+        self.assertIn('True', x)
 
-        self.assertTrue(x.count('False') == 2)
-        self.assertTrue(x.count('True') == 2)
+        query = """queryNodeIndex('type:Function AND name:if_test')
+        .functionsToASTNodesOfType('Condition').filter{it.code == 'arg2'}
+        .outE('FLOWS_TO').flowLabel
+        """
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(len(x), 2)
+        self.assertIn('False', x)
+        self.assertIn('True', x)
     
     def testWhile(self):
         query = """queryNodeIndex('type:Function AND name:while_test')
