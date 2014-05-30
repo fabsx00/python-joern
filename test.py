@@ -171,7 +171,48 @@ class DataFlowTests(PythonJoernTests):
         x = self.j.runGremlinQuery(query)
         self.assertEquals(len(x), 1)
 
+class ControlFlowTests(PythonJoernTests):
 
+    def testIf(self):
+        query = """queryNodeIndex('type:Function AND name:if_test')
+        .functionsToASTNodesOfType('Condition')
+        .outE('FLOWS_TO').flowLabel
+        """
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(len(x), 4)
+
+        self.assertTrue(x.count('False') == 2)
+        self.assertTrue(x.count('True') == 2)
+    
+    def testWhile(self):
+        query = """queryNodeIndex('type:Function AND name:while_test')
+        .functionsToASTNodesOfType('Condition')
+        .outE('FLOWS_TO').flowLabel
+        """
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(len(x), 2)
+        self.assertIn('False', x)
+        self.assertIn('True', x)
+
+    def testDoWhile(self):
+        query = """queryNodeIndex('type:Function AND name:do_test')
+        .functionsToASTNodesOfType('Condition')
+        .outE('FLOWS_TO').flowLabel
+        """
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(len(x), 2)
+        self.assertIn('False', x)
+        self.assertIn('True', x)
+
+    def testFor(self):
+        query = """queryNodeIndex('type:Function AND name:for_test')
+        .functionsToASTNodesOfType('Condition')
+        .outE('FLOWS_TO').flowLabel
+        """
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(len(x), 2)
+        self.assertIn('False', x)
+        self.assertIn('True', x)
+   
 if __name__ == '__main__':
     unittest.main()
-    
