@@ -20,6 +20,16 @@ Gremlin.defineStep('sources', [Vertex,Pipe], {
 })
 
 /**
+   Data consumers of the statement enclosing an AST-node.
+*/
+
+Gremlin.defineStep('sinks', [Vertex,Pipe], {
+	_().statements()
+	.out(DATA_FLOW_EDGE)
+})
+
+
+/**
    For a set of destination nodes: all paths in the control flow graph
    from data sources where no node on the path redefines the produced
    symbol and no node on the path matches a sanitizer description.
