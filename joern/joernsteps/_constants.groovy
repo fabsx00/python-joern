@@ -10,6 +10,7 @@ NODE_FILEPATH = 'filepath'
 
 // Node Values
 
+TYPE_CALL = 'CallExpression'
 TYPE_CALLEE = 'Callee'
 TYPE_FUNCTION = 'Function'
 TYPE_ARGLIST = 'ArgumentList'

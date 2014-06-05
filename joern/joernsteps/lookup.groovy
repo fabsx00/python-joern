@@ -37,6 +37,18 @@ Object.metaClass.getNodesWithTypeAndCode = { type, code ->
 
 
 /**
+   Retrieve nodes with given type
+   
+   @param type The node type
+   
+*/
+
+Object.metaClass.getNodesWithType = { type ->
+	query = "$NODE_TYPE:$type"
+	queryNodeIndex(query)
+}
+
+/**
    Retrieve nodes with given type and name.
    
    @param type The node type
@@ -78,6 +90,16 @@ Object.metaClass.getFunctionASTsByName = { name ->
 	getNodesWithTypeAndName(TYPE_FUNCTION, name)
 	.out(FUNCTION_TO_AST_EDGE)
 }
+
+/**
+   Retrieve all calls.
+   
+*/
+
+Object.metaClass.getAllCalls = {
+	getNodesWithType(TYPE_CALL)
+}
+
 
 /**
    Retrieve calls by name.
