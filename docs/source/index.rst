@@ -18,6 +18,7 @@ joern, you will almost definitely want to install this library as well.
 
    installation
    gettingstarted
+   chunking
    joernsteps
 
 Indices and tables

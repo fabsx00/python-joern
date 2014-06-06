@@ -1,5 +1,5 @@
-Getting Started
-===============
+Basic Usage
+===========
 
 Python-joern currently provides a single class, JoernSteps, that
 allows to connect to the database server and run queries. The
@@ -20,10 +20,12 @@ Gremlin query.
 	j.connectToDatabase()
 
 	res =  j.runGremlinQuery('getFunctionsByName("main")')
+	# res =  j.runCypherQuery('...')
 
 	for r in res: print r
 
-In the following, we discuss each of the employed methods in detail.
+The sample script employs all methods offered by JoernSteps. We now
+discuss each of these methods in detail.
 
 setGraphDbURL(url)
 -------------------
@@ -54,6 +56,15 @@ runGremlinQuery(query)
 -----------------------
 
 **Run the specified Gremlin query.** The supplied query is executed
+and the result is returned. Depending on the query, the result may
+have a different data type, however, it is typically an iterable
+containing nodes that match the query.
+
+
+runCypherQuery(query)
+-----------------------
+
+**Run the specified Cypher query.** The supplied query is executed
 and the result is returned. Depending on the query, the result may
 have a different data type, however, it is typically an iterable
 containing nodes that match the query.
