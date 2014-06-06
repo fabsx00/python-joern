@@ -60,3 +60,16 @@ Gremlin.defineStep('statements', [Vertex,Pipe],{
 Gremlin.defineStep('functions', [Vertex,Pipe],{
 	_().functionId.idToNode()
 });
+
+
+/**
+   Get number of children of an AST node.
+*/
+
+Gremlin.defineStep('numChildren', [Vertex, Pipe], {
+	_().transform{ numChildren(it)  }
+})
+
+Object.metaClass.numChildren = { it ->
+	it.out('IS_AST_PARENT').toList().size()
+}
