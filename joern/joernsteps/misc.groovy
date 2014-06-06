@@ -19,6 +19,13 @@ Gremlin.defineStep('idsToNodes', [Vertex,Pipe], {
 	_().transform{ g.v(it) }.scatter()
 })
 
+/**
+   Create nodes from a list of node ids
+*/
+
+Object.metaClass.idListToNodes = { listOfIds ->
+  _().transform{ listOfIds }.scatter().idsToNodes()
+}
 
 Gremlin.defineStep('isCheck', [Vertex, Pipe], { symbol ->
 

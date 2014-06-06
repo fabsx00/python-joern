@@ -17,18 +17,6 @@ Gremlin.defineStep('astNodes', [Vertex, Pipe], {
 })
 
 /**
-   Traverses to all nodes of the given sub tree that match
-   `predicate`.
-   
-   @param predicate the boolean function to evaluate on each node.
-   
-*/
-
-Gremlin.defineStep('match', [Vertex, Pipe], { predicate -> 
-	_().astNodes().filter(predicate)
-})
-
-/**
    Traverse to parent-nodes of AST nodes.
 */
 

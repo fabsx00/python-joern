@@ -92,6 +92,22 @@ Object.metaClass.getFunctionASTsByName = { name ->
 }
 
 /**
+   Retrieve all statements (including conditions)
+*/
+
+Object.metaClass.getAllStatements = {
+	queryNodeIndex('isCFGNode:True')
+}
+
+/**
+   Retrieve all conditions
+*/
+
+Object.metaClass.getAllConditions = {
+	getNodesWithType('Condition')
+}
+
+/**
    Retrieve all calls.
    
 */
