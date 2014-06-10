@@ -55,3 +55,40 @@ class DataFlowTests(PythonJoernTests):
         """
         x = self.j.runGremlinQuery(query)
         self.assertEquals(len(x), 1)
+
+    def testCallTainting(self):
+        query = """
+        getFunctionASTsByName('test_call_tainting').
+        getCallsTo('taint_source').
+        sinks().code
+        """
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(x[0], 'y == 0')
+        
+
+    def testTwoTaintSources(self):
+        query = """
+        getFunctionASTsByName('two_taint_sources')
+        .getCallsTo('taint_source').
+        sinks().code
+        """
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(x[0], 'y == 0')
+
+    def testTwoTaintSources2(self):
+        query = """
+        getFunctionASTsByName('two_taint_sources')
+        .getCallsTo('second_taint_source').
+        sinks().code
+        """
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(x[0], 'z == 0')
+    
+    def testNotATaintSource(self):
+        query = """
+        getFunctionASTsByName('test_dataFlowFromUntainted')
+        .getCallsTo('not_a_taint_source')
+        .sinks().code
+        """
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(x, [])
