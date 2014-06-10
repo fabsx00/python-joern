@@ -40,6 +40,21 @@ Gremlin.defineStep('sinks', [Vertex,Pipe], {
 	.out(DATA_FLOW_EDGE)
 })
 
+/**
+   Data consumers of variables defined in the given ASTs.
+*/
+
+Gremlin.defineStep('astSinks', [Vertex,Pipe], {
+	_().transform{ N = it.defines().code.toList(); it.users(N) }.scatter()
+})
+
+/**
+   Data sources of variables used in the given ASTs.
+*/
+
+Gremlin.defineStep('astSources', [Vertex,Pipe], {
+	_().transform{ N = it.used().code.toList(); it.producers(N) }.scatter()
+})
 
 /**
    For a set of destination nodes: all paths in the control flow graph
