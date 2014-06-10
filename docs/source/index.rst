@@ -21,10 +21,6 @@ joern, you will almost definitely want to install this library as well.
    chunking
    joernsteps
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
+You may find answers for more specific questions regarding
+python-joern in the mailing list archive at
+https://listserv.gwdg.de/mailman/private/joern-users/ .

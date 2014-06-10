@@ -42,13 +42,17 @@ Gremlin.defineStep('ithChildren', [Vertex, Pipe], { i ->
 	_().children().filter{ it.childNum == i}
 })
 
+Object.metaClass.isStatement = { it ->
+  it.isCFGNode == 'True'
+}
+
 /**
    Traverse to statements enclosing supplied AST nodes. This may be
    the node itself.
 */
 
 Gremlin.defineStep('statements', [Vertex,Pipe],{
-	_().ifThenElse{it.isCFGNode == 'True'}
+		_().ifThenElse{isStatement(it)}
       		{ it }
       		{ it.in(AST_EDGE).loop(1){it.object.isCFGNode != 'True'} }
 });
