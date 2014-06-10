@@ -42,3 +42,14 @@ class UDGTests(PythonJoernTests):
         """
         x = self.j.runGremlinQuery(query)
         self.assertEquals(len(x), 1)
+
+    
+    def testDefEdgeFromTaintedArg(self):
+        
+        query = """getFunctionASTsByName('test_call_tainting')
+        .astNodes()
+        .filter{ it.type == 'Argument' && it.code == 'y'}
+        .defines().code
+        """
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(x[0], 'y')
