@@ -11,9 +11,11 @@
 
 
 Gremlin.defineStep('astNodes', [Vertex, Pipe], {
-	def x = [] as Set;
-	_().children().loop(1){true}{true}
+	_().transform{
+	 def x = [] as Set;
+	it.children().loop(1){true}{true}
 	.store(x).optional(2).transform{x+it}.scatter()
+	}.scatter()
 })
 
 /**
