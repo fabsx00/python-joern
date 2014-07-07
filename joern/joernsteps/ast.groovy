@@ -67,7 +67,6 @@ Gremlin.defineStep('functions', [Vertex,Pipe],{
 	_().functionId.idToNode()
 });
 
-
 /**
    Get number of children of an AST node.
 */
