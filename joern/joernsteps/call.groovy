@@ -25,3 +25,7 @@ Gremlin.defineStep('calleeToCall', [Vertex, Pipe], {
 Gremlin.defineStep('callToCallee', [Vertex, Pipe],{
 	_().out(AST_EDGE).filter{it.type == 'Callee'}
 })
+
+Gremlin.defineStep('callToAssigns', [Vertex, Pipe], {
+	_().matchParents{it.type == 'AssignmentExpr'}
+})
