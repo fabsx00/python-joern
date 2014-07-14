@@ -53,3 +53,26 @@ class UDGTests(PythonJoernTests):
         """
         x = self.j.runGremlinQuery(query)
         self.assertEquals(x[0], 'y')
+
+    def testPlusEquals(self):
+        query = """
+        getFunctionASTsByName('plusEqualsUse')
+        .astNodes()
+        .filter{ it.type == 'ExpressionStatement'}
+        .out('DEF').code
+        """
+
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(x[0], 'x')
+        
+    def testPlusPlusDef(self):
+        query = """
+        getFunctionASTsByName('plusplus')
+        .astNodes()
+        .filter{ it.type == 'ExpressionStatement'}
+        .out('DEF').code
+        """
+
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(x[0], 'a') 
+        
