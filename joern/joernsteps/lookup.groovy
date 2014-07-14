@@ -72,6 +72,11 @@ Object.metaClass.getFunctionsByName = { name ->
 	getNodesWithTypeAndName(TYPE_FUNCTION, name)
 }
 
+Object.metaClass.getFunctionsByParameter = { param ->
+	getNodesWithTypeAndCode(TYPE_PARAMETER, param)
+	.functions()
+}
+
 Object.metaClass.getFunctionsByFilename = { name ->
 	query = "$NODE_TYPE:$TYPE_FILE AND $NODE_FILEPATH:$name"
 	queryNodeIndex(query)
