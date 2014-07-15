@@ -64,7 +64,27 @@ class UDGTests(PythonJoernTests):
 
         x = self.j.runGremlinQuery(query)
         self.assertEquals(x[0], 'x')
-        
+
+    def testPlusEqualsExpr(self):
+        query = """
+        getFunctionASTsByName('plusEqualsUse')
+        .astNodes()
+        .filter{ it.type == 'AssignmentExpr'}
+        .out('DEF').code
+        """
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(x[0], 'x')
+
+    def testPlusEqualsExprUse(self):
+        query = """
+        getFunctionASTsByName('plusEqualsUse')
+        .astNodes()
+        .filter{ it.type == 'AssignmentExpr'}
+        .out('USE').code
+        """
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(x[0], 'x')
+
     def testPlusPlusDef(self):
         query = """
         getFunctionASTsByName('plusplus')
@@ -72,7 +92,24 @@ class UDGTests(PythonJoernTests):
         .filter{ it.type == 'ExpressionStatement'}
         .out('DEF').code
         """
+    
+    def testPlusPlusDefExpr(self):
+        query = """
+        getFunctionASTsByName('plusplus')
+        .astNodes()
+        .filter{ it.type == 'IncDecOp'}
+        .out('DEF').code
+        """
 
         x = self.j.runGremlinQuery(query)
         self.assertEquals(x[0], 'a') 
-        
+
+    def testPlusPlusUseExpr(self):
+        query = """
+        getFunctionASTsByName('plusplus')
+        .astNodes()
+        .filter{ it.type == 'IncDecOp'}
+        .out('USE').code
+        """
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(x[0], 'a') 
