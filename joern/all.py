@@ -47,6 +47,8 @@ class JoernSteps:
         """ Runs the specified cypher query on the graph database."""
         return cypher.execute(self.graphDb, cmd)
 
+    def getGraphDbURL(self):
+        return self.graphDbURL
     
     """
     Create chunks from a list of ids.
