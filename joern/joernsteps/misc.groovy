@@ -31,11 +31,27 @@ Gremlin.defineStep('idsToNodes', [Vertex,Pipe], {
 })
 
 /**
+   Map node ids to nodes
+*/
+
+Gremlin.defineStep('idsToEdges', [Vertex,Pipe], {
+	_().transform{ g.e(it) }.scatter()
+})
+
+/**
    Create nodes from a list of node ids
 */
 
 Object.metaClass.idListToNodes = { listOfIds ->
   _().transform{ listOfIds }.scatter().idsToNodes()
+}
+
+/**
+   Create nodes from a list of node ids
+*/
+
+Object.metaClass.idListToEdges = { listOfIds ->
+  _().transform{ listOfIds }.scatter().idsToEdges()
 }
 
 Gremlin.defineStep('isCheck', [Vertex, Pipe], { symbol ->
