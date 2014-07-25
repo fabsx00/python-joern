@@ -18,6 +18,14 @@ class CFGTests(PythonJoernTests):
         .outE('FLOWS_TO').flowLabel""" % function
         return self.j.runGremlinQuery(query)
 
+    def _CFGInfiniteNodeEdgeLabels(self, function):
+        query = """getFunctionsByName('%s')
+        .functionsToASTNodesOfType('InfiniteForNode')
+        .outE('FLOWS_TO').flowLabel""" % function
+        return self.j.runGremlinQuery(query)
+
+    
+
     def testSwitch1(self):
         self.assertEquals(len(self._numberCFGNodes('switch_test1')), 9)
         self.assertEquals(len(self._numberCFGEdges('switch_test1')), 11)
@@ -73,7 +81,7 @@ class CFGTests(PythonJoernTests):
     def testInfiniteFor(self):
         self.assertEquals(len(self._numberCFGNodes('infinite_for_test')), 4)
         self.assertEquals(len(self._numberCFGEdges('infinite_for_test')), 4)
-        labels = self._CFGConditionEdgeLabels('infinite_for_test')
+        labels = self._CFGInfiniteNodeEdgeLabels('infinite_for_test')
         self.assertIn('True', labels)
         self.assertIn('False', labels)
         self.assertEqual(len(labels), 2)
@@ -87,8 +95,8 @@ class CFGTests(PythonJoernTests):
         self.assertEqual(len(labels), 2)
 
     def testFor2(self):
-        self.assertEquals(len(self._numberCFGNodes('for_test1')), 5)
-        self.assertEquals(len(self._numberCFGEdges('for_test1')), 5)
+        self.assertEquals(len(self._numberCFGNodes('for_test1')), 4)
+        self.assertEquals(len(self._numberCFGEdges('for_test1')), 4)
         labels = self._CFGConditionEdgeLabels('for_test1')
         self.assertIn('True', labels)
         self.assertIn('False', labels)
