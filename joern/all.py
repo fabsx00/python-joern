@@ -47,6 +47,20 @@ class JoernSteps:
         """ Runs the specified cypher query on the graph database."""
         return cypher.execute(self.graphDb, cmd)
 
+    def getGraphDbURL(self):
+        return self.graphDbURL
+    
+    """
+    Create chunks from a list of ids.
+    This method is useful when you want to execute many independent 
+    traversals on a large set of start nodes. In that case, you
+    can retrieve the set of start node ids first, then use 'chunks'
+    to obtain disjoint subsets that can be passed to idListToNodes.
+    """
+    def chunks(self, idList, chunkSize):
+        for i in xrange(0, len(idList), chunkSize):
+            yield idList[i:i+chunkSize]
+
     def _initJoernSteps(self):
         self.graphDbURL = DEFAULT_GRAPHDB_URL
         self.stepsDirs = [DEFAULT_STEP_DIR]

@@ -7,11 +7,6 @@ Introduction
 A thin python interface for joern and a set of useful utility
 traversals.
 
-*Warning*: if you are using the current master-branch, this library is
-not for you as the master-branch already contains a python interface
-to joern bundled with joern. This is the python interface for future
-versions of joern (development branch).
-
 Dependencies:
 --
 

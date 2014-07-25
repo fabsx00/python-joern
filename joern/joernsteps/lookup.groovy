@@ -37,6 +37,18 @@ Object.metaClass.getNodesWithTypeAndCode = { type, code ->
 
 
 /**
+   Retrieve nodes with given type
+   
+   @param type The node type
+   
+*/
+
+Object.metaClass.getNodesWithType = { type ->
+	query = "$NODE_TYPE:$type"
+	queryNodeIndex(query)
+}
+
+/**
    Retrieve nodes with given type and name.
    
    @param type The node type
@@ -60,6 +72,11 @@ Object.metaClass.getFunctionsByName = { name ->
 	getNodesWithTypeAndName(TYPE_FUNCTION, name)
 }
 
+Object.metaClass.getFunctionsByParameter = { param ->
+	getNodesWithTypeAndCode(TYPE_PARAMETER, param)
+	.functions()
+}
+
 Object.metaClass.getFunctionsByFilename = { name ->
 	query = "$NODE_TYPE:$TYPE_FILE AND $NODE_FILEPATH:$name"
 	queryNodeIndex(query)
@@ -78,6 +95,32 @@ Object.metaClass.getFunctionASTsByName = { name ->
 	getNodesWithTypeAndName(TYPE_FUNCTION, name)
 	.out(FUNCTION_TO_AST_EDGE)
 }
+
+/**
+   Retrieve all statements (including conditions)
+*/
+
+Object.metaClass.getAllStatements = {
+	queryNodeIndex('isCFGNode:True')
+}
+
+/**
+   Retrieve all conditions
+*/
+
+Object.metaClass.getAllConditions = {
+	getNodesWithType('Condition')
+}
+
+/**
+   Retrieve all calls.
+   
+*/
+
+Object.metaClass.getAllCalls = {
+	getNodesWithType(TYPE_CALL)
+}
+
 
 /**
    Retrieve calls by name.

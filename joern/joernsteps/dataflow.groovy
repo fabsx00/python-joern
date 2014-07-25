@@ -10,6 +10,18 @@ Gremlin.defineStep('producers', [Vertex,Pipe], { N ->
 	_().statements().In(DATA_FLOW_EDGE, DATA_FLOW_SYMBOL, N )
 })
 
+
+/**
+   Data users of the statement enclosing an AST-node, limited to a
+   set N of symbols.
+
+   N A set of symbols of interest
+*/
+
+Gremlin.defineStep('users', [Vertex,Pipe], { N ->
+	_().statements().Out(DATA_FLOW_EDGE, DATA_FLOW_SYMBOL, N )
+})
+
 /**
    Data producers of the statement enclosing an AST-node.
 */
@@ -17,6 +29,31 @@ Gremlin.defineStep('producers', [Vertex,Pipe], { N ->
 Gremlin.defineStep('sources', [Vertex,Pipe], {
 	_().statements()
 	.in(DATA_FLOW_EDGE)
+})
+
+/**
+   Data consumers of the statement enclosing an AST-node.
+*/
+
+Gremlin.defineStep('sinks', [Vertex,Pipe], {
+	_().statements()
+	.out(DATA_FLOW_EDGE)
+})
+
+/**
+   Data consumers of variables defined in the given ASTs.
+*/
+
+Gremlin.defineStep('astSinks', [Vertex,Pipe], {
+	_().transform{ N = it.defines().code.toList(); it.users(N) }.scatter()
+})
+
+/**
+   Data sources of variables used in the given ASTs.
+*/
+
+Gremlin.defineStep('astSources', [Vertex,Pipe], {
+	_().transform{ N = it.used().code.toList(); it.producers(N) }.scatter()
 })
 
 /**
