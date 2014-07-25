@@ -95,9 +95,9 @@ class CFGTests(PythonJoernTests):
         self.assertEqual(len(labels), 2)
 
     def testFor2(self):
-        self.assertEquals(len(self._numberCFGNodes('for_test1')), 4)
-        self.assertEquals(len(self._numberCFGEdges('for_test1')), 4)
-        labels = self._CFGConditionEdgeLabels('for_test1')
+        self.assertEquals(len(self._numberCFGNodes('for_test2')), 5)
+        self.assertEquals(len(self._numberCFGEdges('for_test2')), 5)
+        labels = self._CFGConditionEdgeLabels('for_test2')
         self.assertIn('True', labels)
         self.assertIn('False', labels)
         self.assertEqual(len(labels), 2)
