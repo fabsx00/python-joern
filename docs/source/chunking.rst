@@ -5,6 +5,7 @@ Running the same traversal on a large set of start nodes often leads
 to unacceptable performance as all nodes and edges touched by the
 traversal are kept in server memory before returning results. For
 example, the query::
+
 	getAllStatements().astNodes().id
 
 which retrieves all astNodes that are part of statements, can already

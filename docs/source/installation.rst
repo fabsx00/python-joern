@@ -33,6 +33,7 @@ typically suffice::
 
 Install the gremlin-plugin for neo4j from
 https://github.com/fabsx00/py2neo-gremlin/releases/tag/0.1::
+
 	wget https://github.com/fabsx00/py2neo-gremlin/archive/0.1.tar.gz
 	tar xfz 0.1.tar.gz
 	cd py2neo-gremlin-0.1
