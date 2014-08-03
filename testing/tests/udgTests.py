@@ -2,7 +2,34 @@
 from PythonJoernTests import *
 
 class UDGTests(PythonJoernTests):
-    
+
+    def testSimpleDecl(self):
+        query = """getFunctionASTsByName('udg_test_simple_decl')
+        .astNodes().filter{it.isCFGNode == 'True'}
+        .defines().filter{it.code == 'x'}
+        .code
+        """        
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(len(x), 1)
+
+    def testDeclWithAssign(self):
+        query = """getFunctionASTsByName('udg_test_decl_with_assign')
+        .astNodes().filter{it.isCFGNode == 'True'}
+        .defines().filter{it.code == 'x'}
+        .code
+        """        
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(len(x), 1)
+
+    def testParamDecl(self):
+        query = """getFunctionASTsByName('udg_test_param_decl')
+        .astNodes().filter{it.isCFGNode == 'True'}
+        .defines().filter{it.code == 'x'}
+        .code
+        """        
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(len(x), 1)
+
     def testComplexArg(self):
         
         query = """getFunctionASTsByName('complexInArgs')
