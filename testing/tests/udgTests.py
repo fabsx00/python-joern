@@ -253,3 +253,14 @@ class UDGTests(PythonJoernTests):
         
         self.assertTrue('buf' in x)
         self.assertTrue('i' in x)
+
+    def testNonDerefUnary(self):
+
+        query = """
+        getFunctionASTsByName('nonDerefUnary')
+        .astNodes().filter{it.isCFGNode == 'True'}
+        .uses().code
+        """
+
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(x[0], 'a')
