@@ -84,6 +84,11 @@ Object.metaClass.getFunctionsByFilename = { name ->
 	.filter{ it.type == TYPE_FUNCTION }
 }
 
+Object.metaClass.getFunctionsByFileAndName = { filename, name ->
+	getFunctionsByFilename(filename)
+	.filter{ it.name == name }
+}
+
 /**
    Retrieve functions by name.
    
