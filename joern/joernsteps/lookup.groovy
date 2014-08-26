@@ -89,6 +89,11 @@ Object.metaClass.getFunctionsByFileAndName = { filename, name ->
 	.filter{ it.name == name }
 }
 
+Object.metaClass.getFilesByName = { filename ->
+	query = "$NODE_TYPE:$TYPE_FILE AND $NODE_FILEPATH:$filename"
+	queryNodeIndex(query)
+}
+
 /**
    Retrieve functions by name.
    
