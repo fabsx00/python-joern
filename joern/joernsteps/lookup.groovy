@@ -17,9 +17,12 @@
    
 */
 
-Object.metaClass.queryNodeIndex = { query ->
-	index = g.getRawGraph().index().forNodes(NODE_INDEX)
-	new Neo4jVertexSequence(index.query(query), g)._()
+Object.metaClass.queryNodeIndex = { query, honorVisibility = true ->
+        index = g.getRawGraph().index().forNodes(NODE_INDEX)
+	if(honorVisibility)
+		new Neo4jVertexSequence(index.query(query), g)._().visible()
+	else
+		new Neo4jVertexSequence(index.query(query), g)._()
 }
 
 /**
@@ -56,9 +59,9 @@ Object.metaClass.getNodesWithType = { type ->
    
 */
 
-Object.metaClass.getNodesWithTypeAndName = { type, name ->
+Object.metaClass.getNodesWithTypeAndName = { type, name, honorVisibility = true  ->
 	query = "$NODE_TYPE:$type AND $NODE_NAME:$name"
-	queryNodeIndex(query)
+	queryNodeIndex(query, honorVisibility)
 }
 
 /**
@@ -68,8 +71,8 @@ Object.metaClass.getNodesWithTypeAndName = { type, name ->
    
 */
 
-Object.metaClass.getFunctionsByName = { name ->
-	getNodesWithTypeAndName(TYPE_FUNCTION, name)
+Object.metaClass.getFunctionsByName = { name, honorVisibility = true ->
+	getNodesWithTypeAndName(TYPE_FUNCTION, name, honorVisibility)
 }
 
 Object.metaClass.getFunctionsByParameter = { param ->
@@ -77,21 +80,21 @@ Object.metaClass.getFunctionsByParameter = { param ->
 	.functions()
 }
 
-Object.metaClass.getFunctionsByFilename = { name ->
+Object.metaClass.getFunctionsByFilename = { name, honorVisibility = true ->
 	query = "$NODE_TYPE:$TYPE_FILE AND $NODE_FILEPATH:$name"
-	queryNodeIndex(query)
+	queryNodeIndex(query, honorVisibility)
 	.out('IS_FILE_OF')
 	.filter{ it.type == TYPE_FUNCTION }
 }
 
-Object.metaClass.getFunctionsByFileAndName = { filename, name ->
-	getFunctionsByFilename(filename)
+Object.metaClass.getFunctionsByFileAndName = { filename, name, honorVisibility = true ->
+	getFunctionsByFilename(filename, honorVisibility)
 	.filter{ it.name == name }
 }
 
-Object.metaClass.getFilesByName = { filename ->
+Object.metaClass.getFilesByName = { filename, honorVisibility = true ->
 	query = "$NODE_TYPE:$TYPE_FILE AND $NODE_FILEPATH:$filename"
-	queryNodeIndex(query)
+	queryNodeIndex(query, honorVisibility)
 }
 
 /**
