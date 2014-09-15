@@ -116,16 +116,17 @@ cfgPaths = { symbol, sanitizer, src, dst ->
 
 Object.metaClass._cfgPaths = {symbol, sanitizer, curNode, dst, visited, path ->
   
+  // return an empty set if this node is a sanitizer
+  if( ( path != [] ) && isTerminationNode(symbol, sanitizer, curNode, visited)){
+    return [] as Set
+  }
+
   // return path when destination has been reached
   if(curNode == dst){
     return [path + curNode] as Set
   }
   
-  // return an empty set if this node is a sanitizer
-  if( ( path != [] ) && isTerminationNode(symbol, sanitizer, curNode, visited)){
-    return [] as Set
-  }
-  
+    
   // `h` in the paper is inlined here
   
   def children = curNode._().out(CFG_EDGE).toList()
