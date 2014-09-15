@@ -169,7 +169,7 @@ isTerminationNode = { symbol, sanitizer, curNode, visited ->
   
   def curNodeId = curNode.toString()
   
-  sanitizer(curNode).toList() != [] ||
+  sanitizer(curNode, symbol).toList() != [] ||
   (curNode.defines().filter{ it.code == symbol}.toList() != []) ||
   (visited.get(curNodeId) == 2)
 }
