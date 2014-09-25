@@ -144,7 +144,7 @@ Object.metaClass.getAllCalls = {
 
 Object.metaClass.getCallsTo = { callee ->
 	
-	getNodesWithTypeAndCode(TYPE_CALLEE, callee)
+	getNodesWithTypeAndCode(TYPE_CALLEE, callee.split('::')[-1].trim() )
 	.parents()
 }
 

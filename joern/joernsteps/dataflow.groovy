@@ -135,7 +135,7 @@ Object.metaClass._cfgPaths = {symbol, sanitizer, curNode, dst, visited, path ->
 
   for(child in children){
       
-    def curNodeId = curNode.toString()
+    def curNodeId = curNode.id;
     
     x = _cfgPaths(symbol, sanitizer, child, dst,
 		  visited + [ (curNodeId) : (visited.get(curNodeId, 0) + 1)],
@@ -168,7 +168,7 @@ Object.metaClass._cfgPaths = {symbol, sanitizer, curNode, dst, visited, path ->
 
 isTerminationNode = { symbol, sanitizer, curNode, visited -> 
   
-  def curNodeId = curNode.toString()
+  def curNodeId = curNode.id
   
   sanitizer(curNode, symbol).toList() != [] ||
   (curNode.defines().filter{ it.code == symbol}.toList() != []) ||
