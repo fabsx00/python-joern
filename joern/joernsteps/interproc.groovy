@@ -1,3 +1,6 @@
+
+import java.util.regex.Pattern;
+
 /**
    For a given argument node, determine direct initializers, i.e., 
    the last statements, which tainted any of the variables.
@@ -23,6 +26,18 @@ Gremlin.defineStep('parameterToCallerArgs', [Vertex, Pipe], {
 		getCallsTo(funcName).ithArguments(paramNum)
 	}.scatter()
 })
+
+Gremlin.defineStep('argToParameters', [Vertex, Pipe], {
+	_().transform{
+		argNum = it.childNum;
+		def callee = it.argToCall().callToCallee().code.toList()[0]
+		println callee
+		getFunctionASTsByName(callee)
+		.children().filter{ it.type == "ParameterList"}
+		.children().filter{ it.childNum == argNum}
+	}.scatter()
+})
+
 
 /**
   For a given argument node, determine local initializers.
@@ -56,6 +71,19 @@ Gremlin.defineStep('expandParameters', [Vertex, Pipe], {
 
 })
 
+Gremlin.defineStep('expandArguments', [Vertex, Pipe], {
+	_().transform{
+	  
+	  def args = it.match{ it.type == "Argument"}.toList()
+
+	  if(args != []){
+	   def l = args._().argToParameters().toList();
+	   if(l != []) l else it._().toList()
+	  }else
+	   it._().toList()
+	}.scatter()
+})
+
 Gremlin.defineStep('iUnsanitized', [Vertex,Pipe], { sanitizer, src = { [1]._() }  ->
   
 	_().transform{
@@ -63,7 +91,7 @@ Gremlin.defineStep('iUnsanitized', [Vertex,Pipe], { sanitizer, src = { [1]._() }
        		nodes = getNodesToSrc(it, src)
 		srcChecker = { node -> if(node.id in nodes) [10] else [] }
 	        
-		it.as('x').expandParameters().unsanitized(sanitizer, srcChecker)
+		it.as('x').expandParameters().unsanitized(sanitizer, srcChecker).dedup()
 		.loop('x'){ it.loops <= 4 && (src(it.object).toList() == [] || src(it.object).toList() == [1] ) }
 		{src(it.object).toList() != []}
 	}.scatter()
@@ -109,7 +137,7 @@ Object.metaClass.argIsTainted = { node, argNum, src ->
 	
 	node.ithArguments(argNum)
 	.as('y').expandParameters().tainted().dedup()
-	.loop('y'){ it.loops <= 8 && (src(it.object).toList() == [] || src(it.object).toList() == [1] ) }
+	.loop('y'){ it.loops <= 4 && (src(it.object).toList() == [] || src(it.object).toList() == [1] ) }
 	// {  src(it.object).toList() == [10] }
 	.filter{ src(it).toList() != [] }
 	.toList() != []
@@ -131,9 +159,15 @@ Gremlin.defineStep('nonEmpty', [Vertex,Pipe], { closure ->
 Gremlin.defineStep('checks', [Vertex,Pipe], { regex ->
 
   _().match{ it.type in ['EqualityExpression', 'RelationalExpression', 'PrimaryExpression', 'UnaryOp'] }
-  .filter{ regex = '.*' + Pattern.quote(regex) + '.*';
-           it.code.matches(regex) }
+  .filter{ it.code.matches('.*' + Pattern.quote(regex) + '.*') }
 })
+
+Gremlin.defineStep('checksRaw', [Vertex,Pipe], { regex ->
+
+  _().match{ it.type in ['EqualityExpression', 'RelationalExpression', 'PrimaryExpression', 'UnaryOp'] }
+  .filter{ it.code.matches(regex) }
+})
+
 
 Gremlin.defineStep('calls', [Vertex,Pipe], { regex ->
    _().match{it.type in ['CallExpression'] }
