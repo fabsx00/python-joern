@@ -164,6 +164,15 @@ Object.metaClass.getArguments = { name, i ->
 	getCallsTo(name).ithArguments(i)
 }
 
+Object.metaClass.getConditions = { funcname, regex, filename = null ->
+
+  if(filename == null)
+    getFunctionASTsByName(funcname).match{ it.type == "Condition" && it.code.matches(regex) }
+  else
+    getFunctionsByFileAndName(filename, funcname).functionToAST()
+    .match{ it.type == "Condition" && it.code.matches(regex) } 
+}
+
 
   /////////////////////////////////////////////////
  //     Corresponding Gremlin Steps             //

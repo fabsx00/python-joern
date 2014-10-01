@@ -32,8 +32,9 @@ Gremlin.defineStep('argToParameters', [Vertex, Pipe], {
 		argNum = it.childNum;		
 		def callee = it.argToCall().callToCallee().code.toList()[0]		
 		callee = callee.replace('* ', '')
-		callee = callee.split("(::)|(\\.)")[-1].trim()		
-		// println callee
+		// callee = callee.split("(::)|(\\.)")[-1].trim()		
+		callee = callee.split(' ')[-1].trim()
+		
 		getFunctionASTsByName(callee)
 		.children().filter{ it.type == "ParameterList"}
 		.children().filter{ it.childNum == argNum}.toList()
