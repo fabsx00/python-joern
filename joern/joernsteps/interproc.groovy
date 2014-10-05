@@ -88,27 +88,26 @@ Gremlin.defineStep('expandArguments', [Vertex, Pipe], {
 	}.scatter()
 })
 
-Gremlin.defineStep('iUnsanitized', [Vertex,Pipe], { sanitizer, src = { [1]._() }  ->
-  
-	// 1: DONT_CARE
-	// 10: matches source
-	
+
+Gremlin.defineStep('iUnsanitized', [Vertex,Pipe], { sanitizer, src = { [1]._() }, N_LOOPS = 4 ->
+  	
+	// Note, that the special value [1] is returned by
+	// source descriptions to indicate that the user
+	// does not care what the source looks like.
+			
 	_().transform{
-		
-		N_LOOPS = 4
 		
        	nodes = getNodesToSrc(it, src, N_LOOPS)
 		finalNodes = nodes.findAll{ it[1] == true}.collect{ it[0] }.unique()
 		nodes = nodes.collect{ it[0] }.unique()
-		
 		srcChecker = { node -> if(node.id in nodes) [10] else [] }
 		
 		it.as('x').expandParameters().unsanitized(sanitizer, srcChecker).dedup()
-		// loop if either no node matched the source-description or we simply don't have one.
+		// loop if either no node matched the source-description or we simply don't have a source description
 		.loop('x'){ it.loops <= N_LOOPS && (src(it.object).toList() == [] || src(it.object).toList() == [1] ) }
 		// output nodes if they match the source description or we don't have one. 
-		// and only if they are final nodes
-		{src(it.object).toList() != [] && (it.object.id in finalNodes) }		
+		// and only if they are final nodes.
+		{src(it.object).toList() != [] && (it.object.id in finalNodes) }
 		
 	}.scatter()
 })
@@ -168,6 +167,7 @@ Object.metaClass.argIsTainted = { node, argNum, src ->
 	node.ithArguments(argNum)
 	.as('y').expandParameters().tainted().dedup()
 	.loop('y'){ it.loops <= 4 && (src(it.object).toList() == [] || src(it.object).toList() == [1] ) }
+	{true}
 	// {  src(it.object).toList() == [10] }
 	.filter{ src(it).toList() != [] }
 	.toList() != []
@@ -187,22 +187,24 @@ Gremlin.defineStep('nonEmpty', [Vertex,Pipe], { closure ->
 
 
 Gremlin.defineStep('checks', [Vertex,Pipe], { regex ->
-	
-  _().match{ it.type in ['EqualityExpression', 'RelationalExpression', 'PrimaryExpression', 'UnaryOp'] }
-  .filter{ it.code.matches('.*' + Pattern.quote(regex) + '.*') }
+		
+	_().as('y').match{ it.type in ['EqualityExpression', 'RelationalExpression', 'PrimaryExpression', 'UnaryOp'] }
+  	.back('y').uses().filter{ it.code.matches('.*' + Pattern.quote(regex) + '.*') }  
+	  
 })
 
 Gremlin.defineStep('checksRaw', [Vertex,Pipe], { regex ->
 
-  _().match{ it.type in ['EqualityExpression', 'RelationalExpression', 'PrimaryExpression', 'UnaryOp'] }
-  .filter{ it.code.matches(regex) }
+	_().as('y').match{ it.type in ['EqualityExpression', 'RelationalExpression', 'PrimaryExpression', 'UnaryOp'] }
+	.back('y').uses().filter{ it.code.matches(regex) }
+
+	  
 })
 
-
 Gremlin.defineStep('calls', [Vertex,Pipe], { regex ->
-		
-	_().match{it.type  == 'CallExpression' }
-       .filter{ it.code.matches(regex) }
+	
+	_().match{ it.type in ['Callee'] }
+	.filter{ it.code.matches('.*' + Pattern.quote(regex) + '.*') }
 })
 
 NO_RESTRICTION = { a,s -> []}

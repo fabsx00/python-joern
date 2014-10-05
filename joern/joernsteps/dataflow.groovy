@@ -69,6 +69,10 @@ Gremlin.defineStep('unsanitized', [Vertex, Pipe], { sanitizer, src = { [1]._() }
   _().uPath(sanitizer, src).firstElem()
 })
 
+Gremlin.defineStep('unsanitizedPaths', [Vertex, Pipe], { sanitizer, src = {[1]._() } ->
+	_().uPath(sanitizer, src)
+})
+
 Gremlin.defineStep('firstElem', [Vertex, Pipe], {
 	_().transform{it[0]}
 })	
