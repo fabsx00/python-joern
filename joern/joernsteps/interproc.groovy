@@ -225,6 +225,6 @@ Object.metaClass.source = { closure ->
 }
 
 Object.metaClass.sourceMatches = { regex ->
-  return { if(it.code.matches(regex)){ [10] } else [] }
+  return { if(it.apiSyms().filter{ it.matches(regex) }.toList()){ [10] } else [] }
 }
 
