@@ -210,9 +210,9 @@ Gremlin.defineStep('calls', [Vertex,Pipe], { regex ->
 Gremlin.defineStep('_or', [Vertex, Pipe], { Object [] closures ->	
 	
 	_().transform{
-		closures.collect{ cl -> cl(it) }
+		closures.collect{ cl -> cl(it).toList() }
 		.flatten()
-	}.scatter()
+	}.scatter().dedup()
 	
 })
 
