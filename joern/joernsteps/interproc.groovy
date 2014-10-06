@@ -89,7 +89,7 @@ Gremlin.defineStep('expandArguments', [Vertex, Pipe], {
 })
 
 
-Gremlin.defineStep('iUnsanitized', [Vertex,Pipe], { sanitizer, src = { [1]._() }, N_LOOPS = 4 ->
+Gremlin.defineStep('iUnsanitized', [Vertex,Pipe], { sanitizer, src = { [1]._() }, N_LOOPS = 2 ->
   	
 	// Note, that the special value [1] is returned by
 	// source descriptions to indicate that the user
@@ -112,10 +112,10 @@ Gremlin.defineStep('iUnsanitized', [Vertex,Pipe], { sanitizer, src = { [1]._() }
 	}.scatter()
 })
 
-Gremlin.defineStep('taintedArg', [Vertex, Pipe], { argNum, src = { [1]._() } ->
+Gremlin.defineStep('taintedArg', [Vertex, Pipe], { argNum, src = { [1]._() }, N_LOOPS = 2 ->
 
 	_().filter{
-		argIsTainted(it, argNum, src)
+	  argIsTainted(it, argNum, src, N_LOOPS)
 	}
 })
 
@@ -162,11 +162,11 @@ Object.metaClass._getNodesToSrc = { it, src, depth, N_LOOPS ->
 		return x.plus([[it.id, false]])
 }
 
-Object.metaClass.argIsTainted = { node, argNum, src ->
+Object.metaClass.argIsTainted = { node, argNum, src, N_LOOPS = 2 ->
 	
 	node.ithArguments(argNum)
 	.as('y').expandParameters().tainted().dedup()
-	.loop('y'){ it.loops <= 4 && (src(it.object).toList() == [] || src(it.object).toList() == [1] ) }
+	.loop('y'){ it.loops <= N_LOOPS && (src(it.object).toList() == [] || src(it.object).toList() == [1] ) }
 	{true}
 	// {  src(it.object).toList() == [10] }
 	.filter{ src(it).toList() != [] }
@@ -207,6 +207,16 @@ Gremlin.defineStep('calls', [Vertex,Pipe], { regex ->
 	.filter{ it.code.matches('.*' + Pattern.quote(regex) + '.*') }
 })
 
+Gremlin.defineStep('_or', [Vertex, Pipe], { Object [] closures ->	
+	
+	_().transform{
+		closures.collect{ cl -> cl(it) }
+		.flatten()
+	}.scatter()
+	
+})
+
+
 NO_RESTRICTION = { a,s -> []}
 ANY_SOURCE = { [1]._() }
 
@@ -217,3 +227,4 @@ Object.metaClass.source = { closure ->
 Object.metaClass.sourceMatches = { regex ->
   return { if(it.code.matches(regex)){ [10] } else [] }
 }
+
