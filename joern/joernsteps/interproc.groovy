@@ -112,6 +112,45 @@ Gremlin.defineStep('iUnsanitized', [Vertex,Pipe], { sanitizer, src = { [1]._() }
 	}.scatter()
 })
 
+Gremlin.defineStep('iUnsanitizedPaths', [Vertex,Pipe], { sanitizer, src = { [1]._() }, N_LOOPS = 2 ->
+		  
+  _().transform{
+	  
+	  nodes = getNodesToSrc(it, src, N_LOOPS)
+	  finalNodes = nodes.findAll{ it[1] == true}.collect{ it[0] }.unique()
+	  nodes = nodes.collect{ it[0] }.unique()
+	  srcChecker = { node -> if(node.id in nodes) [10] else [] }
+	  
+	  it.sideEffect{ d = [:]; rootNode = null; }
+	  .as('x').expandParameters()
+	  .unsanitizedPaths(sanitizer, srcChecker).dedup()
+	  .transform{
+		  def path = it.toList()
+		  if(!rootNode && path.size() != 0) rootNode = path[-1]
+		  d[path[-1]] = (d[path[-1]] ?: []).plus([path]);
+	  	  path[0]
+	  }
+	  .loop('x'){ it.loops <= N_LOOPS && (src(it.object).toList() == [] || src(it.object).toList() == [1] ) }
+	  {src(it.object).toList() != [] && (it.object.id in finalNodes) }
+	  .transform{
+		  dict2List(d, rootNode)
+	  }
+	  
+  } //.scatter()
+})
+
+Object.metaClass.dict2List = { d, node ->
+	if(!d[node])
+		return [[node, []]]
+	
+	def retval = [[node, d[node]]]
+	d[node].each{
+		retval.add(dict2List(d, it[0]))
+	}
+	retval
+}
+
+
 Gremlin.defineStep('taintedArg', [Vertex, Pipe], { argNum, src = { [1]._() }, N_LOOPS = 2 ->
 
 	_().filter{
@@ -207,14 +246,34 @@ Gremlin.defineStep('calls', [Vertex,Pipe], { regex ->
 	.filter{ it.code.matches('.*' + Pattern.quote(regex) + '.*') }
 })
 
+Gremlin.defineStep('codeMatches', [Vertex, Pipe], { regex, s ->
+	s = Pattern.quote(s)
+	if(regex.contains("%s"))
+		_().filter{it.code.matches(String.format(regex, s)) }
+	else
+		_().filter{it.code.matches(regex) }
+})
+
 Gremlin.defineStep('_or', [Vertex, Pipe], { Object [] closures ->	
 	
 	_().transform{
-		closures.collect{ cl -> cl(it).toList() }
-		.flatten()
-	}.scatter().dedup()
-	
+		def ret = []
+		closures.each{ cl ->
+			def x = cl(it).toList()
+			ret.addAll(x)
+		}
+		flattenByOne(ret.unique())
+	}.scatter()
 })
+
+/**
+ * Like 'flatten' but only flatten by one layer.
+ * */
+
+Object.metaClass.flattenByOne = { lst ->
+	lst.inject([]) {acc, val-> acc.plus(val)}
+}
+
 
 
 NO_RESTRICTION = { a,s -> []}
