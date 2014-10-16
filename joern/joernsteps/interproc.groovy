@@ -89,7 +89,7 @@ Gremlin.defineStep('expandArguments', [Vertex, Pipe], {
 })
 
 
-Gremlin.defineStep('iUnsanitized', [Vertex,Pipe], { sanitizer, src = { [1]._() }, N_LOOPS = 2 ->
+Gremlin.defineStep('iUnsanitized', [Vertex,Pipe], { sanitizer, src = { [1]._() }, N_LOOPS = 4 ->
   	
 	// Note, that the special value [1] is returned by
 	// source descriptions to indicate that the user
@@ -112,7 +112,7 @@ Gremlin.defineStep('iUnsanitized', [Vertex,Pipe], { sanitizer, src = { [1]._() }
 	}.scatter()
 })
 
-Gremlin.defineStep('iUnsanitizedPaths', [Vertex,Pipe], { sanitizer, src = { [1]._() }, N_LOOPS = 2 ->
+Gremlin.defineStep('iUnsanitizedPaths', [Vertex,Pipe], { sanitizer, src = { [1]._() }, N_LOOPS = 4 ->
 		  
   _().transform{
 	  
@@ -151,7 +151,7 @@ Object.metaClass.dict2List = { d, node ->
 }
 
 
-Gremlin.defineStep('taintedArg', [Vertex, Pipe], { argNum, src = { [1]._() }, N_LOOPS = 2 ->
+Gremlin.defineStep('taintedArg', [Vertex, Pipe], { argNum, src = { [1]._() }, N_LOOPS = 4 ->
 
 	_().filter{
 	  argIsTainted(it, argNum, src, N_LOOPS)
@@ -247,7 +247,7 @@ Gremlin.defineStep('calls', [Vertex,Pipe], { regex ->
 })
 
 Gremlin.defineStep('codeMatches', [Vertex, Pipe], { regex, s ->
-	s = Pattern.quote(s)
+        s = Pattern.quote(s)
 	if(regex.contains("%s"))
 		_().filter{it.code.matches(String.format(regex, s)) }
 	else
