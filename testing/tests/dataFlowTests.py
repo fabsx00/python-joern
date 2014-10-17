@@ -40,7 +40,7 @@ class DataFlowTests(PythonJoernTests):
         srcNode = getFunctionASTsByName('ddg_simplest_test')
         .getNodesWithTypeAndCode('AssignmentExpr', '*').statements().toList()[0]
         
-        cfgPaths('x', { [] } , srcNode, dstNode )
+        cfgPaths('x', { it, s -> [] } , srcNode, dstNode )
         """
         x = self.j.runGremlinQuery(query)
         self.assertEquals(len(x[0]), 2)
@@ -51,7 +51,7 @@ class DataFlowTests(PythonJoernTests):
         getFunctionASTsByName('ddg_simplest_test')
         .getCallsTo('foo')
         .statements()
-        .unsanitized({[]})
+        .unsanitized({ it, s -> []})
         """
         x = self.j.runGremlinQuery(query)
         self.assertEquals(len(x), 1)
