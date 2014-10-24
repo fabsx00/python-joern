@@ -124,7 +124,7 @@ class UDGTests(PythonJoernTests):
         
         query = """getFunctionASTsByName('test_call_tainting')
         .astNodes()
-        .filter{ it.type == 'Argument' && it.code == 'y'}
+        .filter{ it.type == 'Argument' && it.code == '& y'}
         .defines().code
         """
         x = self.j.runGremlinQuery(query)
