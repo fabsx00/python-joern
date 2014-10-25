@@ -92,3 +92,24 @@ class DataFlowTests(PythonJoernTests):
         """
         x = self.j.runGremlinQuery(query)
         self.assertEquals(x, [])
+
+    def testParamTaintByCall(self):
+        
+        query = """
+        getFunctionASTsByName('testParamTaint')
+        .getCallsTo('taint_source')
+        .sinks().code
+        """
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(x, ['EXIT'])
+        
+    def testParamTaintByAssign(self):
+        
+        query = """
+        getFunctionASTsByName('testParamTaintAssign')
+        .match{it.type == 'AssignmentExpr'}
+        .sinks().code
+        """
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(x, ['EXIT'])
+        
