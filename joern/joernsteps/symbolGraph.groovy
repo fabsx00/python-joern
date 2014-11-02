@@ -19,7 +19,7 @@ Gremlin.defineStep('usesFiltered', [Vertex,Pipe], {
 	
 		acc = []
 		L.each{ node ->
-			if(node.code.startsWith('*')) return;
+		        // if(node.code.startsWith('*')) return;
 			if(acc.findAll{ it.code.contains(node.code) }.size() != 0) return;
 			acc << node; 
 		}
