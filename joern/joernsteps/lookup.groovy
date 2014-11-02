@@ -19,10 +19,15 @@
 
 Object.metaClass.queryNodeIndex = { query, honorVisibility = true ->
         index = g.getRawGraph().index().forNodes(NODE_INDEX)
-	if(honorVisibility)
-		new Neo4jVertexSequence(index.query(query), g)._().visible()
-	else
-		new Neo4jVertexSequence(index.query(query), g)._()
+	
+	try{
+	  if(honorVisibility)
+	    new Neo4jVertexSequence(index.query(query), g)._().visible()
+	   else
+	    new Neo4jVertexSequence(index.query(query), g)._()
+	}catch(ParseException){
+	  return []._()
+	}
 }
 
 /**
@@ -134,7 +139,6 @@ Object.metaClass.getAllCalls = {
 	getNodesWithType(TYPE_CALL)
 }
 
-
 /**
    Retrieve calls by name.
    
@@ -146,18 +150,13 @@ Object.metaClass.getCallsTo = { callee ->
 	
   callee = callee.split(' ')[-1].trim()
   callee = callee.replace('*', '')
-  if(callee.contains('=')) return []._()
-  if(callee.contains('+')) return []._()
-  if(callee.contains('-')) return []._()
-  if(callee.contains('*')) return []._()
-  if(callee.contains('/')) return []._()
-  if(callee.contains('[')) return []._()
-  if(callee.contains(']')) return []._()
-  
-  
+    
   getNodesWithTypeAndCode(TYPE_CALLEE, callee)
   .parents()
+  
 }
+
+
 
 /**
    Retrieve arguments to functions. Corresponds to the traversal

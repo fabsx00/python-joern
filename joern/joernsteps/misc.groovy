@@ -65,3 +65,13 @@ Gremlin.defineStep('isCheck', [Vertex, Pipe], { symbol ->
 Gremlin.defineStep('codeContains', [Vertex, Pipe], { symbol ->
 	_().filter{it.code != null}.filter{ it.code.matches(symbol) }
 })
+
+/**
+ * Traverse to all API symbols from given AST nodes.
+ **/
+
+Gremlin.defineStep('apiSyms', [Vertex,Pipe], {
+	
+	_().match{it.type in ['Callee','IdentifierDeclType', 'Parameter']}.code
+})
+
