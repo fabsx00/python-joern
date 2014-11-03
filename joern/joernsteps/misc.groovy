@@ -75,3 +75,22 @@ Gremlin.defineStep('apiSyms', [Vertex,Pipe], {
 	_().match{it.type in ['Callee','IdentifierDeclType', 'Parameter']}.code
 })
 
+/**
+ * Like 'flatten' but only flatten by one layer.
+ * */
+
+Object.metaClass.flattenByOne = { lst ->
+	lst.inject([]) {acc, val-> acc.plus(val)}
+}
+
+Gremlin.defineStep('_or', [Vertex, Pipe], { Object [] closures ->
+	
+	_().transform{
+		def ret = []
+		closures.each{ cl ->
+			def x = cl(it).toList()
+			ret.addAll(x)
+		}
+		flattenByOne(ret.unique())
+	}.scatter()
+})
