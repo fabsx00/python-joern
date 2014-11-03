@@ -112,7 +112,18 @@ Gremlin.defineStep('argToParameters', [Vertex, Pipe], {
  * */
 
 Gremlin.defineStep('argTainters', [Vertex,Pipe], {
-	def params = _().taintedArguments().expandArguments()
+	
+	_().transform{
+	
+		def params = it.taintedArguments().expandArguments().toList();
+				
+		if(params == [])
+			return []._()
+		
+		symbols = params._().transform{ x = it.code.split(' '); x[1 .. ( x.size()-1)].join(' ') }.toList()
+		params[0]._().toExitNode().producers(symbols).toList()
+	}.scatter()
+	
 		
 })
 
@@ -120,8 +131,9 @@ Gremlin.defineStep('argTainters', [Vertex,Pipe], {
  * For a given call-site, return arguments that are tainted.
  * */
 
-Gremlin.defineStep('taintedArguments', [Vertex, Pipe], {
-	_().callToArguments().filter{ it.defines().toList() != [] }
+Gremlin.defineStep('taintedArguments', [Vertex,Pipe], {
+	_().callToArguments()
+	.filter{ it.defines().toList() != [] }
 })
 
 /**
