@@ -21,13 +21,13 @@ class InterprocTests(PythonJoernTests):
         .code
         """
         x = self.j.runGremlinQuery(query)
-        self.assertEquals(x[0], '* x = foo ( )')
+        self.assertEquals(x[0], '* x = source12 ( )')
     
-    def testTaintedArgs(self):
+    def testTaintedArg(self):
         query = """
         getFunctionASTsByName("interproc_arg_tainter_test")
-        .match{ it.type == "CallExpression" && it.code.startsWith('bar')}
-        .taintedArg('0', { it -> if(it.code.matches('.*foo.*')) [1] else [] } )
+        .match{ it.type == "CallExpression" && it.code.startsWith('sink12')}
+        .taintedArg('0', { it -> if(it.code.matches('.*source12.*')) [1] else [] } )
         .code
         """
         x = self.j.runGremlinQuery(query)

@@ -8,7 +8,7 @@ Gremlin.defineStep('iUnsanitized', [Vertex,Pipe], { sanitizer, src = { [1]._() }
 		  
   _().transform{
 	  
-		 nodes = getNodesToSrc(it, src, N_LOOPS)
+	  nodes = getNodesToSrc(it, src, N_LOOPS)
 	  finalNodes = nodes.findAll{ it[1] == true}.collect{ it[0] }.unique()
 	  nodes = nodes.collect{ it[0] }.unique()
 	  srcChecker = { node -> if(node.id in nodes) [10] else [] }
@@ -56,7 +56,9 @@ Object.metaClass._getNodesToSrc = { it, src, depth, N_LOOPS ->
 		  return []
   }
   
-  def children = it._().expandParameters().tainted().toList()
+  def children = it._().taintedArgExpand()
+  // expandParameters().allProducers()
+  .toList()
   
   def x = children.collect{ child ->
 	  _getNodesToSrc(child, src, depth + 1, N_LOOPS)
