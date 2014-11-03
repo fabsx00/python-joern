@@ -25,8 +25,8 @@ Gremlin.defineStep('iUnsanitized', [Vertex,Pipe], { sanitizer, src = { [1]._() }
 
 
 /**
-   (Called by iUnsanitized)
-   Starting from a sink-node 'it' and for a given
+  (Called by iUnsanitized)
+  Starting from a sink-node 'it' and for a given
   source-description 'sourceDescription', find all
   source nodes that match the source description
   even across the boundaries of functions.
@@ -57,7 +57,7 @@ Object.metaClass._getNodesToSrc = { it, src, depth, N_LOOPS ->
   }
   
   def children = it._().taintedArgExpand()
-  // expandParameters().allProducers()
+   // .expandParameters().allProducers()
   .toList()
   
   def x = children.collect{ child ->

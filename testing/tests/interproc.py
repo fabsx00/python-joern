@@ -33,3 +33,16 @@ class InterprocTests(PythonJoernTests):
         x = self.j.runGremlinQuery(query)
         self.assertEquals(len(x), 1)
     
+    def testGetNodesToSrc(self):
+        
+        query = """
+        getFunctionASTsByName("interproc_arg_tainter_test")
+        .match{ it.type == "CallExpression" && it.code.startsWith('sink12')}
+        .statements()
+        .transform{ it -> getNodesToSrc(it, { it2 -> if(it2.code.matches('.*source12.*')) [20] else [] }  , 4) }
+        .scatter().transform{ g.v(it[0]).code }
+        """
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(x[1], 'interproc_callee ( & x )')
+        
+        
