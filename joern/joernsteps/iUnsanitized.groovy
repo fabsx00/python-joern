@@ -13,7 +13,7 @@ Gremlin.defineStep('iUnsanitized', [Vertex,Pipe], { sanitizer, src = { [1]._() }
 	  nodes = nodes.collect{ it[0] }.unique()
 	  srcChecker = { node -> if(node.id in nodes) [10] else [] }
 	  
-	  it.as('x').expandParameters().unsanitized(sanitizer, srcChecker).dedup()
+	  it.as('x').iUnsanitizedExpand(sanitizer, srcChecker).dedup()
 	  // loop if either no node matched the source-description or we simply don't have a source description
 	  .loop('x'){ it.loops <= N_LOOPS && (src(it.object).toList() == [] || src(it.object).toList() == [1] ) }
 	  // output nodes if they match the source description or we don't have one.
@@ -21,6 +21,22 @@ Gremlin.defineStep('iUnsanitized', [Vertex,Pipe], { sanitizer, src = { [1]._() }
 	  {src(it.object).toList() != [] && (it.object.id in finalNodes) }
 	  
   }.scatter()
+})
+
+Gremlin.defineStep('iUnsanitizedExpand', [Vertex,Pipe], { sanitizer, srcChecker ->
+	
+	_().transform{
+		if(it.type == 'Parameter')
+			it.expandParameters().toList()
+		else{
+			def l = [];
+			tainters = it.match{it.type == 'CallExpression'}.argTainters().toList()
+			l.addAll(tainters)
+			l.addAll(it.unsanitized(sanitizer, srcChecker).toList())
+			l
+		}
+	}.scatter()
+	
 })
 
 

@@ -44,5 +44,15 @@ class InterprocTests(PythonJoernTests):
         """
         x = self.j.runGremlinQuery(query)
         self.assertEquals(x[1], 'interproc_callee ( & x )')
+
+    def testIUnsanitized(self):
         
-        
+        query = """
+        getFunctionASTsByName("interproc_arg_tainter_test")
+        .match{ it.type == "CallExpression" && it.code.startsWith('sink12')}
+        .statements()
+        .iUnsanitized(NO_RESTRICTION, { it2 -> if(it2.code.matches('.*source12.*')) [20] else [] } )
+        .code
+        """
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(x[0], '* x = source12 ( )')
