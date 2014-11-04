@@ -8,16 +8,30 @@
  *
  **/
 
-Gremlin.defineStep('taintedArgs', [Vertex, Pipe], { argNum, src = { [1]._() }, N_LOOPS = 4 ->
+Gremlin.defineStep('taintedArgs', [Vertex, Pipe], { argDescrs ->
 
-	// build initialization graphs
-	// -> We need to move the initialization-graph building
-	// to python-joern.
+	// Before we can do anything, we need to generate
+	// an initialization graph for the call-site
+
+	callId = _().id.toList()[0]
+	tGraph = createInitGraph()
 	
-	// necessary condition
-	// decompress initialization graphs
+	// Check if tainted arg fulfills necessary condition
+	// if it doesn't, then we can return an empty set
+	if(canBeTainted(tGraph, argDescrs))
+		return []
+	
+	// necessary condition is fulfilled.
+	// now decompress the initialization graph
+	
+	invocs = decompressInitGraph(tGraph)
+	invocs.findAll{ isTainted(it, argDescrs) }
 	
 })
+
+/**
+ * Necessary condition in paper.
+ * */
 
 Object.metaClass.canBeTainted = { tGraph, argDescrs ->
 	
@@ -32,5 +46,20 @@ Object.metaClass.canBeTainted = { tGraph, argDescrs ->
 		if (leaveNodes.findAll(it) == [])
 			return false
 	}
+	return true
+}
+
+/**
+ * Sufficient condition in paper
+ * */
+
+Object.metaClass.isTainted = { invoc, argDescrs ->
+	
+	for(int i = 0; i < argDescrs.size(); i++){
+		f = argDescrs[i]	
+		if(invoc.defStmtsPerArg[i].collect{ g.v(it) }.findAll{ f(it) }.toList() == [])
+			return false
+	}
+	
 	return true
 }

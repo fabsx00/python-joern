@@ -67,12 +67,13 @@ class InitGraphTests(PythonJoernTests):
     def testCanBeTainted1(self):
         
         query = """
-        
+
+        argDescrs = [{ it.code.contains('sourceA')}, { it.code.contains('sourceB')} ]
         callSiteId = getFunctionASTsByName("two_arg_sink_caller")
         .match{ it.type == "CallExpression" && it.code.startsWith('asink') }
         .id.toList()[0];
         initGraph = createInitGraph(callSiteId)
-        canBeTainted(initGraph, [{ it.code.contains('sourceA')}, { it.code.contains('sourceB')} ] )
+        canBeTainted(initGraph, argDescrs)
         
         """
         x = self.j.runGremlinQuery(query)
@@ -91,3 +92,35 @@ class InitGraphTests(PythonJoernTests):
         """
         x = self.j.runGremlinQuery(query)
         self.assertEquals(x, 'false')
+
+    def testIsTainted1(self):
+        
+        query = """
+        
+        argDescrs = [{ it.code.contains('sourceA')}, { it.code.contains('sourceB')} ]
+        callSiteId = getFunctionASTsByName("two_arg_sink_caller_p")
+        .match{ it.type == "CallExpression" && it.code.startsWith('asink') }
+        .id.toList()[0];
+        initGraph = createInitGraph(callSiteId)
+        invocs = decompressInitGraph(initGraph)
+        invocs.collect{ isTainted(it, argDescrs) }
+
+        """
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(x[0], 'true')
+
+    def testIsTainted1(self):
+        
+        query = """
+        
+        argDescrs = [{ it.code.contains('sourceA')}, { it.code.contains('sourceB')} ]
+        callSiteId = getFunctionASTsByName("two_arg_sink_caller")
+        .match{ it.type == "CallExpression" && it.code.startsWith('asink') }
+        .id.toList()[0];
+        initGraph = createInitGraph(callSiteId)
+        invocs = decompressInitGraph(initGraph)
+        invocs.collect{ isTainted(it, argDescrs) }
+
+        """
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(x[0], 'false')
