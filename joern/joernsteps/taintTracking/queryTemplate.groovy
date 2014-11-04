@@ -13,20 +13,21 @@ Gremlin.defineStep('taintedArgs', [Vertex, Pipe], { argDescrs ->
 	// Before we can do anything, we need to generate
 	// an initialization graph for the call-site
 
-	callId = _().id.toList()[0]
-	tGraph = createInitGraph()
+	_().transform{
+		callId = it.id
+		tGraph = createInitGraph(callId)
 	
-	// Check if tainted arg fulfills necessary condition
-	// if it doesn't, then we can return an empty set
-	if(canBeTainted(tGraph, argDescrs))
-		return []
+		// Check if tainted arg fulfills necessary condition
+		// if it doesn't, then we can return an empty set
+		if(!canBeTainted(tGraph, argDescrs))
+			return []
 	
-	// necessary condition is fulfilled.
-	// now decompress the initialization graph
+		// necessary condition is fulfilled.
+		// now decompress the initialization graph
 	
-	invocs = decompressInitGraph(tGraph)
-	invocs.findAll{ isTainted(it, argDescrs) }
-	
+		invocs = decompressInitGraph(tGraph)
+		invocs.findAll{ isTainted(it, argDescrs) }
+	}.scatter()
 })
 
 /**
@@ -60,6 +61,5 @@ Object.metaClass.isTainted = { invoc, argDescrs ->
 		if(invoc.defStmtsPerArg[i].collect{ g.v(it) }.findAll{ f(it) }.toList() == [])
 			return false
 	}
-	
 	return true
 }
