@@ -18,3 +18,19 @@ Gremlin.defineStep('taintedArgs', [Vertex, Pipe], { argNum, src = { [1]._() }, N
 	// decompress initialization graphs
 	
 })
+
+Object.metaClass.canBeTainted = { tGraph, argDescrs ->
+	
+	// In the future, we want to do this per arg,
+	// doesn't matter right now, it's only
+	// a necessary condition anyway.
+	
+	def leaveNodes = tGraph.graphlets.leaves.flatten()
+	.collect{ g.v(it) }
+
+	for(it in argDescrs){
+		if (leaveNodes.findAll(it) == [])
+			return false
+	}
+	return true
+}
