@@ -62,6 +62,25 @@ Object.metaClass.isTainted = { invoc, argDescrs ->
 	return true
 }
 
-Gremlin.defineStep('unchecked', [Vertex,Pipe], {
-	
+Gremlin.defineStep('unchecked', [Vertex,Pipe], { argDescrs ->
+	_().transform{ 
+				
+		it.checksPerArg = genConditionsPerArg(it.allGraphlets, it.graphletIds)
+		
+		// subtract one because the last one contains conditions unassigned to symbols
+		for(int i = 0; i < it.checksPerArg.size() -1; i++){
+			f = argDescrs[i]
+			syms = it.checksPerArg[i].syms.flatten()
+			
+			for(int j = 0; j < syms.size(); j++){
+				// if one of the sanitizer-descriptions matches, this is sanitized, so return []
+				X = it.checksPerArg[i].flatten().cndId.collect{ g.v(it) }
+					.findAll{ x -> f(x, syms[j]) }
+				if( X != []) return []
+			}
+			
+		}
+		// none of the sanitizer-descriptions matched
+		return [it]
+	}.scatter()
 })

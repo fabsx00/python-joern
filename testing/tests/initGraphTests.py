@@ -154,3 +154,35 @@ class InitGraphTests(PythonJoernTests):
         """
         x = self.j.runGremlinQuery(query)
         self.assertEquals(len(x), 0)
+
+    def testUnchecked1(self):
+        
+        query = """
+        
+        argDescrs = [{ it.code.contains('sourceA')}, { it.code.contains('sourceB')} ]
+        sanitizerDescrs = [ {it,s -> false}, { it,s -> it.code.contains(s) }]
+        
+        getFunctionASTsByName("two_arg_sink_caller_p")
+        .match{ it.type == "CallExpression" && it.code.startsWith('asink') }
+        .taintedArgs(argDescrs)
+        .unchecked(sanitizerDescrs)
+        
+        """
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(len(x), 1)
+
+    def testUnchecked2(self):
+        
+        query = """
+        
+        argDescrs = [{ it.code.contains('sourceA')}, { it.code.contains('sourceB')} ]
+        sanitizerDescrs = [ { it,s -> false }, { it,s -> false } ]
+        
+        getFunctionASTsByName("two_arg_sink_caller_p")
+        .match{ it.type == "CallExpression" && it.code.startsWith('asink') }
+        .taintedArgs(argDescrs)
+        .unchecked(sanitizerDescrs)
+        
+        """
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(len(x), 2)
