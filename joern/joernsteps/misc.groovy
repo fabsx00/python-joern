@@ -94,3 +94,24 @@ Gremlin.defineStep('_or', [Vertex, Pipe], { Object [] closures ->
 		flattenByOne(ret.unique())
 	}.scatter()
 })
+
+
+/**
+ For a given list, create a reverse
+ index that maps list items to the indices
+ they occur at.
+*/
+
+Object.metaClass.createReverseIndex = { aList ->
+	def reverseIndex = [:]
+	aList.eachWithIndex{ item, i ->
+		if (!reverseIndex.containsKey(item)){ reverseIndex[item] = [] }
+		reverseIndex[item] << i
+	}
+	reverseIndex
+}
+
+Object.metaClass.compareLists = { x, y ->
+	if(x == y) return 0
+	return 1
+}
