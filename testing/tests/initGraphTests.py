@@ -15,7 +15,7 @@ class InitGraphTests(PythonJoernTests):
 
         """
         x = self.j.runGremlinQuery(query)
-        self.assertEquals(x, 2)
+        self.assertEquals(x, 3)
     
     def testCreate2(self):
         
@@ -138,7 +138,7 @@ class InitGraphTests(PythonJoernTests):
         
         """
         x = self.j.runGremlinQuery(query)
-        self.assertEquals(len(x), 1)
+        self.assertEquals(len(x), 2)
 
     
     def testTaintedArgs2(self):

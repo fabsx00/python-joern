@@ -1,12 +1,10 @@
 
 
 /**
- * Input: call-sites (in a pipe)
- * Output: [ (sink, [ [sourceIdArg11, ...], [sourceIdArg21, ...], ... ] ), ... ]
- *
- *
- *
- **/
+ * For a given call-site, get all invocations that match
+ * argument descriptions. `argDescrs` contains a closure
+ * for each argument.
+ * */
 
 Gremlin.defineStep('taintedArgs', [Vertex, Pipe], { argDescrs ->
 
@@ -63,3 +61,7 @@ Object.metaClass.isTainted = { invoc, argDescrs ->
 	}
 	return true
 }
+
+Gremlin.defineStep('unchecked', [Vertex,Pipe], {
+	
+})
