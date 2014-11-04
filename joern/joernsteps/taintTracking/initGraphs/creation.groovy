@@ -40,6 +40,10 @@ Object.metaClass.createInitGraph = { callSiteId ->
 	tGraph
 }
 
+/**
+ * See algorithm for initialization graph creation in the paper.
+ * */
+
 Object.metaClass.taintGraph_ = { def argSet, visited, curIdOffset, depth ->
 
 	def callId, vars, defStmts;
@@ -53,12 +57,8 @@ Object.metaClass.taintGraph_ = { def argSet, visited, curIdOffset, depth ->
 		return []
 
 	// Create graphlet for this argument set
-
-	(vars, defStmts) = varsAndDefStmts(argSet, callId)
-	
-	// (nodeSet, edges, leaves, conditions, argToCnd)
-	
-	def graphlet = createGraphlet(argSet, vars, defStmts, callId)
+		
+	def graphlet = createGraphlet(argSet, callId)
 
 	// If there are no leaves, we may be dealing with a global variable
 	// or a broken parse.
@@ -141,8 +141,10 @@ Object.metaClass.taintGraph_ = { def argSet, visited, curIdOffset, depth ->
 
 */
 
-Object.metaClass.createGraphlet = { argSet, vars, defStmts, callId ->
+Object.metaClass.createGraphlet = { argSet, callId ->
 
+	(vars, defStmts) = varsAndDefStmts(argSet, callId)
+	
 	if(argSet.size() == 0) return;
 	
 	def graphlet = new Graphlet()
