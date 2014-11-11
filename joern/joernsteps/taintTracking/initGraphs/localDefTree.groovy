@@ -28,7 +28,6 @@ class Graphlet{
 Object.metaClass.createGraphlet = { argSet, callId ->
 
 	(vars, defStmts) = varsAndDefStmts(argSet, callId)
-	println vars
 	
 	if(argSet.size() == 0) return;
 	
@@ -37,22 +36,30 @@ Object.metaClass.createGraphlet = { argSet, callId ->
 	// Note: 'symbolsUsed' are all symbols used by the condition,
 	// not the sub-condition as usage information is not available
 	// per sub-tree.
-	
-	
+		
 	// For each defStmt, get controlling conditions
 	
-	
-	def cndUsesPairs = // g.v(argSet[0])
-	
-				defStmts.values().flatten().collect{ g.v(it) }
+	def cndUsesPairs = defStmts.values().flatten().collect{ g.v(it) }
 				
 				._().controllingConditions(1)
 				.sideEffect{ symbolsUsed = it.usesFiltered().id.toList() }
 				.transform{ subConditions(it.id) }.scatter()
 				.transform{ [it, symbolsUsed.collect()] }.toList()
 				.sort()
+	
+	
+	// For call-site, get controlling conditions
+				
+	cndUsesPairs.addAll (g.v(argSet[0])
+						._().controllingConditions(1)
+						.sideEffect{ symbolsUsed = it.usesFiltered().id.toList() }
+						.transform{ subConditions(it.id) }.scatter()
+						.transform{ [it, symbolsUsed.collect()] }.toList()
+						.sort())
+	
+	cndUsesPairs.sort()
+	
 	def conditions = cndUsesPairs.collect{ it[0] }
-
 	
 	
 	def leafNodes = defStmts.values().flatten().sort()
@@ -104,20 +111,24 @@ Object.metaClass.varsAndDefStmts = { argSet, callId ->
 	
 	def vars = []
 	def defStmts = [:]
+	def visited = []
+	def varsForArg = []
 	
 	// Perform depth-first traversal for each
 	// argument independently
 	
 	argSet.each{ arg ->
 		def nodes = [[arg, 0]]
-		def varsForArg = []
-		def visited = []
+		
+		varsForArg = []
+		visited = []
 		
 		while(nodes != []){
-			def curNode = nodes.pop()
+			def curNode = nodes.remove(0)
 			def newNodes = varsAndDefExpand(curNode, varsForArg, defStmts, visited)
 			nodes.addAll(newNodes)
 		}
+		
 		vars.add(varsForArg)
 	}
 	
@@ -126,24 +137,43 @@ Object.metaClass.varsAndDefStmts = { argSet, callId ->
 
 Object.metaClass.varsAndDefExpand = { curNode, varsForArg, defStmts, visited ->
 	
+	def newDefs = []
+	
 	(nodeId, depth) = curNode
 	
 	if(depth == 3) // MAXDEPTH-parameter
-		return []
+		return newDefs
 	
 	if(nodeId in visited)
-		return []	
+		return newDefs
 	visited.add(nodeId)
-		
+	
 	def node = g.v(nodeId)
-	def symbolNodeIds = node._().usesFiltered().id.dedup().toList()
-	varsForArg.addAll(symbolNodeIds)
-	varsForArg.unique()
-	def statementId = node._().statements().id.toList()[0]
+	
+	if(node.type == "Argument"){
+			
 		
-	def newDefs = expandSymbolNodes(symbolNodeIds, statementId, defStmts)
+		def symbolNodeIds = getSymbolNodeIds(node)
+		varsForArg.addAll(symbolNodeIds)
+		varsForArg.unique()
+		def statementId = getCallId(node.id)
+		newDefs = expandSymbolNodes(symbolNodeIds, statementId, defStmts)
+		
+	}else{
+	
+		def symbolNodeIds = getSymbolNodeIds(node)
+		varsForArg.addAll(symbolNodeIds)
+		varsForArg.unique()
+		def statementId = node._().statements().id.toList()[0]
+		newDefs = expandSymbolNodes(symbolNodeIds, statementId, defStmts)
+	
+	}
+	
 	return newDefs.collect{ [it, depth + 1] }
+}
 
+Object.metaClass.getSymbolNodeIds = {node ->
+	node._().usesFiltered().id.dedup().toList()
 }
 
 Object.metaClass.expandSymbolNodes = { symbolNodeIds, statementId, defStmts ->
