@@ -51,7 +51,7 @@ Object.metaClass.createGraphlet = { argSet, callId ->
 	// For call-site, get controlling conditions
 				
 	cndUsesPairs.addAll (g.v(argSet[0])
-						._().controllingConditions(1)
+						._().controllingConditions(3)
 						.sideEffect{ symbolsUsed = it.usesFiltered().id.toList() }
 						.transform{ subConditions(it.id) }.scatter()
 						.transform{ [it, symbolsUsed.collect()] }.toList()
@@ -109,6 +109,25 @@ Object.metaClass.createGraphlet = { argSet, callId ->
 
 Object.metaClass.varsAndDefStmts = { argSet, callId ->
 	
+	
+	// For each argument, determine variables used.
+	// (The .dedup is a precaution and should not be
+	// neccessary.)
+
+/*	def vars = argSet.collect{ g.v(it)._().usesFiltered().id.dedup().toList() }
+	def varsCode = argSet.collect{ g.v(it)._().usesFiltered().code.dedup().toList() }.flatten()
+	def defStmts = [:]
+
+	// For each variable used, determine direct DEF-statements
+	// (There can be several direct DEF statements for a variable)
+
+	vars.flatten().eachWithIndex { varId, i ->
+		X = directDefs(callId, varsCode[i])
+	if(X.size() > 0){ defStmts[varId] = X }
+	}
+	[vars, defStmts]*/
+	
+	
 	def vars = []
 	def defStmts = [:]
 	def visited = []
@@ -118,21 +137,21 @@ Object.metaClass.varsAndDefStmts = { argSet, callId ->
 	// argument independently
 	
 	argSet.each{ arg ->
-		def nodes = [[arg, 0]]
 		
+		def nodes = [[arg, 0]]
 		varsForArg = []
 		visited = []
 		
-		while(nodes != []){
+		while(nodes.size() > 0){
 			def curNode = nodes.remove(0)
 			def newNodes = varsAndDefExpand(curNode, varsForArg, defStmts, visited)
-			nodes.addAll(newNodes)
+			nodes.addAll(newNodes.collect())
 		}
 		
-		vars.add(varsForArg)
+		vars.add(varsForArg.collect())
 	}
 	
-	[vars, defStmts]
+	[vars.collect(), defStmts]
 }
 
 Object.metaClass.varsAndDefExpand = { curNode, varsForArg, defStmts, visited ->
@@ -143,7 +162,7 @@ Object.metaClass.varsAndDefExpand = { curNode, varsForArg, defStmts, visited ->
 	
 	if(depth == 3) // MAXDEPTH-parameter
 		return newDefs
-	
+			
 	if(nodeId in visited)
 		return newDefs
 	visited.add(nodeId)
@@ -151,10 +170,9 @@ Object.metaClass.varsAndDefExpand = { curNode, varsForArg, defStmts, visited ->
 	def node = g.v(nodeId)
 	
 	if(node.type == "Argument"){
-			
 		
 		def symbolNodeIds = getSymbolNodeIds(node)
-		varsForArg.addAll(symbolNodeIds)
+		varsForArg.addAll(symbolNodeIds.collect())
 		varsForArg.unique()
 		def statementId = getCallId(node.id)
 		newDefs = expandSymbolNodes(symbolNodeIds, statementId, defStmts)
@@ -162,7 +180,7 @@ Object.metaClass.varsAndDefExpand = { curNode, varsForArg, defStmts, visited ->
 	}else{
 	
 		def symbolNodeIds = getSymbolNodeIds(node)
-		varsForArg.addAll(symbolNodeIds)
+		varsForArg.addAll(symbolNodeIds.collect())
 		varsForArg.unique()
 		def statementId = node._().statements().id.toList()[0]
 		newDefs = expandSymbolNodes(symbolNodeIds, statementId, defStmts)
@@ -186,7 +204,10 @@ Object.metaClass.expandSymbolNodes = { symbolNodeIds, statementId, defStmts ->
 		def defsForSymbol =  directDefs(statementId, varCode)
 			
 		defsForSymbol.each{ it ->
-			defStmts[(node.id)] = (defStmts[(node.id)]?: []).plus(it)
+			if(defStmts[symbolNodeId] == null)
+				defStmts[symbolNodeId] = []
+			defStmts[symbolNodeId] = defStmts[symbolNodeId].plus(it)
+			defStmts[symbolNodeId].unique()
 		}
 		
 		newDefs.addAll(defsForSymbol)
