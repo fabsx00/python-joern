@@ -17,6 +17,7 @@ Gremlin.defineStep('taintedArgs', [Vertex, Pipe], { argDescrs ->
 	
 		// Check if tainted arg fulfills necessary condition
 		// if it doesn't, then we can return an empty set
+		
 		if(!canBeTainted(tGraph, argDescrs))
 			return []
 	
@@ -55,8 +56,20 @@ Object.metaClass.canBeTainted = { tGraph, argDescrs ->
 Object.metaClass.isTainted = { invoc, argDescrs ->
 	
 	for(int i = 0; i < argDescrs.size(); i++){
-		f = argDescrs[i]	
-		if(invoc.defStmtsPerArg[i].collect{ g.v(it) }.findAll{ f(it) }.toList() == [])
+		f = argDescrs[i]
+		
+		// This allows us to handle 'ANY_SOURCE'
+		// We take it out, meaning that we ask for
+		// the source to be initialized in some way
+		// that discards constants.
+		
+		// try{
+		//	if(invoc.defStmtsPerArg[i] == [] && f() )
+		//		continue;
+		
+		// }catch(RuntimeException r){}
+				
+		if(invoc.defStmtsPerArg[i].collect{ g.v(it) }.findAll(f).toList() == [])
 			return false
 	}
 	return true
