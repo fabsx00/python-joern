@@ -50,7 +50,7 @@ Object.metaClass.createGraphlet = { argSet, callId ->
 	
 	// For call-site, get controlling conditions
 				
-	cndUsesPairs.addAll (g.v(argSet[0])
+	cndUsesPairs.addAll(g.v(argSet[0])
 						._().controllingConditions(3)
 						.sideEffect{ symbolsUsed = it.usesFiltered().id.toList() }
 						.transform{ subConditions(it.id) }.scatter()
@@ -62,7 +62,7 @@ Object.metaClass.createGraphlet = { argSet, callId ->
 	def conditions = cndUsesPairs.collect{ it[0] }
 	
 	
-	def leafNodes = defStmts.values().flatten().sort()
+	def leafNodes = defStmts.values().flatten().sort().unique()
 	def edges = [:]
 
 	// create edges from conditions to variables
@@ -147,7 +147,7 @@ Object.metaClass.varsAndDefStmts = { argSet, callId ->
 			def newNodes = varsAndDefExpand(curNode, varsForArg, defStmts, visited)
 			nodes.addAll(newNodes.collect())
 		}
-		
+			
 		vars.add(varsForArg.collect())
 	}
 	
@@ -160,7 +160,7 @@ Object.metaClass.varsAndDefExpand = { curNode, varsForArg, defStmts, visited ->
 	
 	(nodeId, depth) = curNode
 	
-	if(depth == 3) // MAXDEPTH-parameter
+	if(depth == 1) // MAXDEPTH-parameter
 		return newDefs
 			
 	if(nodeId in visited)
@@ -206,7 +206,7 @@ Object.metaClass.expandSymbolNodes = { symbolNodeIds, statementId, defStmts ->
 		defsForSymbol.each{ it ->
 			if(defStmts[symbolNodeId] == null)
 				defStmts[symbolNodeId] = []
-			defStmts[symbolNodeId] = defStmts[symbolNodeId].plus(it)
+			defStmts[symbolNodeId].add(it)
 			defStmts[symbolNodeId].unique()
 		}
 		
