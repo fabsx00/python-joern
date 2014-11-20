@@ -20,6 +20,7 @@ joern, you will almost definitely want to install this library as well.
    gettingstarted
    chunking
    joernsteps
+   joernnodes
 
 You may find answers for more specific questions regarding
 python-joern in the mailing list archive at

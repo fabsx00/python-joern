@@ -65,3 +65,53 @@ Gremlin.defineStep('isCheck', [Vertex, Pipe], { symbol ->
 Gremlin.defineStep('codeContains', [Vertex, Pipe], { symbol ->
 	_().filter{it.code != null}.filter{ it.code.matches(symbol) }
 })
+
+/**
+ * Traverse to all API symbols from given AST nodes.
+ **/
+
+Gremlin.defineStep('apiSyms', [Vertex,Pipe], {
+	
+	_().match{it.type in ['Callee','IdentifierDeclType', 'Parameter']}.code
+})
+
+/**
+ * Like 'flatten' but only flatten by one layer.
+ * */
+
+Object.metaClass.flattenByOne = { lst ->
+	lst.inject([]) {acc, val-> acc.plus(val)}
+}
+
+Gremlin.defineStep('_or', [Vertex, Pipe], { Object [] closures ->
+	
+	_().transform{
+		def ret = []
+		closures.each{ cl ->
+			def x = cl(it).toList()
+			ret.addAll(x)
+		}
+		flattenByOne(ret.unique())
+	}.scatter()
+})
+
+
+/**
+ For a given list, create a reverse
+ index that maps list items to the indices
+ they occur at.
+*/
+
+Object.metaClass.createReverseIndex = { aList ->
+	def reverseIndex = [:]
+	aList.eachWithIndex{ item, i ->
+		if (!reverseIndex.containsKey(item)){ reverseIndex[item] = [] }
+		reverseIndex[item] << i
+	}
+	reverseIndex
+}
+
+Object.metaClass.compareLists = { x, y ->
+	if(x == y) return 0
+	return 1
+}

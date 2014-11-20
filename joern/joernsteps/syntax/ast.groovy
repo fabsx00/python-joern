@@ -60,14 +60,6 @@ Gremlin.defineStep('statements', [Vertex,Pipe],{
 });
 
 /**
-   Traverse to enclosing functions of AST nodes.
-*/
-
-Gremlin.defineStep('functions', [Vertex,Pipe],{
-	_().functionId.idToNode()
-});
-
-/**
    Get number of children of an AST node.
 */
 

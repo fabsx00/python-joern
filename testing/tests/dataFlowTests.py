@@ -40,7 +40,7 @@ class DataFlowTests(PythonJoernTests):
         srcNode = getFunctionASTsByName('ddg_simplest_test')
         .getNodesWithTypeAndCode('AssignmentExpr', '*').statements().toList()[0]
         
-        cfgPaths('x', { [] } , srcNode, dstNode )
+        cfgPaths('x', { it, s -> [] } , srcNode, dstNode )
         """
         x = self.j.runGremlinQuery(query)
         self.assertEquals(len(x[0]), 2)
@@ -51,7 +51,7 @@ class DataFlowTests(PythonJoernTests):
         getFunctionASTsByName('ddg_simplest_test')
         .getCallsTo('foo')
         .statements()
-        .unsanitized({[]})
+        .unsanitized({ it, s -> []})
         """
         x = self.j.runGremlinQuery(query)
         self.assertEquals(len(x), 1)
@@ -92,3 +92,24 @@ class DataFlowTests(PythonJoernTests):
         """
         x = self.j.runGremlinQuery(query)
         self.assertEquals(x, [])
+
+    def testParamTaintByCall(self):
+        
+        query = """
+        getFunctionASTsByName('testParamTaint')
+        .getCallsTo('taint_source')
+        .sinks().code
+        """
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(x, ['EXIT'])
+        
+    def testParamTaintByAssign(self):
+        
+        query = """
+        getFunctionASTsByName('testParamTaintAssign')
+        .match{it.type == 'AssignmentExpr'}
+        .sinks().code
+        """
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(x, ['EXIT'])
+        

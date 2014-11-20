@@ -2,7 +2,80 @@
 from PythonJoernTests import *
 
 class UDGTests(PythonJoernTests):
-    
+
+    def testSimpleDecl(self):
+        query = """getFunctionASTsByName('udg_test_simple_decl')
+        .astNodes().filter{it.isCFGNode == 'True'}
+        .defines().filter{it.code == 'x'}
+        .code
+        """        
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(len(x), 1)
+
+    def testDeclWithAssign(self):
+        query = """getFunctionASTsByName('udg_test_decl_with_assign')
+        .astNodes().filter{it.isCFGNode == 'True'}
+        .defines().filter{it.code == 'x'}
+        .code
+        """        
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(len(x), 1)
+
+    def testParamDecl(self):
+        query = """getFunctionASTsByName('udg_test_param_decl')
+        .astNodes().filter{it.isCFGNode == 'True'}
+        .defines().filter{it.code == 'x'}
+        .code
+        """        
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(len(x), 1)
+
+    def testUntaintedParamUse(self):
+        
+        query = """getFunctionASTsByName('udg_test_use_untainted_call')
+        .astNodes().filter{it.isCFGNode == 'True'}
+        .defines().filter{it.code == 'x'}
+        .code
+        """
+        
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(len(x), 0)
+
+        query = """getFunctionASTsByName('udg_test_use_untainted_call')
+        .astNodes().filter{it.isCFGNode == 'True'}
+        .uses().filter{it.code == 'x'}
+        .code
+        """
+        
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(len(x), 1)
+
+    def testStructFieldUse(self):
+        
+        query = """getFunctionASTsByName('udg_test_struct_field_use')
+        .astNodes().filter{it.isCFGNode == 'True'}
+        .uses()
+        .code
+        """
+        
+        x = self.j.runGremlinQuery(query)
+        self.assertTrue('x . y' in x)
+        self.assertTrue('x' in x)
+
+    def testArrUse(self):
+        
+        query = """getFunctionASTsByName('arrUse')
+        .astNodes().filter{it.isCFGNode == 'True'}
+        .uses()
+        .code
+        """
+        
+        x = self.j.runGremlinQuery(query)
+        
+        self.assertTrue('arr' in x)
+        self.assertTrue('i' in x)
+
+
     def testComplexArg(self):
         
         query = """getFunctionASTsByName('complexInArgs')
@@ -20,7 +93,7 @@ class UDGTests(PythonJoernTests):
         .uses().code
         """
         x = self.j.runGremlinQuery(query)
-        self.assertEquals(len(x), 4)
+        self.assertEquals(len(x), 5)
         
 
     def testComplexAssign(self):
@@ -30,7 +103,10 @@ class UDGTests(PythonJoernTests):
         .defines().code
         """
         x = self.j.runGremlinQuery(query)
-        self.assertEquals(x[0], 'pLtv -> u . u16')
+        
+        self.assertTrue('* pLtv' in x)
+        self.assertTrue('pLtv -> u' in x)
+        self.assertTrue('pLtv -> u . u16' in x)
 
     def testConditionalExpr(self):
         
@@ -48,7 +124,7 @@ class UDGTests(PythonJoernTests):
         
         query = """getFunctionASTsByName('test_call_tainting')
         .astNodes()
-        .filter{ it.type == 'Argument' && it.code == 'y'}
+        .filter{ it.type == 'Argument' && it.code == '& y'}
         .defines().code
         """
         x = self.j.runGremlinQuery(query)
@@ -113,3 +189,78 @@ class UDGTests(PythonJoernTests):
         """
         x = self.j.runGremlinQuery(query)
         self.assertEquals(x[0], 'a') 
+
+    def testAssignToArrayField(self):
+        query = """
+        getFunctionASTsByName('udg_test_assign_to_array_field')
+        .astNodes().filter{it.isCFGNode == 'True'}
+        .defines().code
+        """
+         
+        x = self.j.runGremlinQuery(query)
+        
+        self.assertTrue('* arr' in x)
+
+    def testAssignToExprDef(self):
+        query = """
+        getFunctionASTsByName('udg_test_assign_to_expression')
+        .astNodes().filter{it.isCFGNode == 'True'}
+        .defines()
+        .code
+        """
+         
+        x = self.j.runGremlinQuery(query)
+        self.assertTrue('* ( a + b )' in x)
+        self.assertTrue('* a' in x)
+        self.assertTrue('* b' in x)
+    
+    def testAssignToExprUse(self):
+        query = """
+        getFunctionASTsByName('udg_test_assign_to_expression')
+        .astNodes().filter{it.isCFGNode == 'True'}
+        .uses()
+        .code
+        """
+         
+        x = self.j.runGremlinQuery(query)
+        
+        self.assertTrue('a' in x)
+        self.assertTrue('b' in x)
+        
+
+    def testArrDefDef(self):
+        
+        query = """
+        getFunctionASTsByName('test_buf_def')
+        .astNodes().filter{it.isCFGNode == 'True'}
+        .defines().code
+        """
+
+        x = self.j.runGremlinQuery(query)
+        
+        self.assertTrue('* buf' in x)
+        self.assertTrue('* i' in x)
+
+    def testArrDefUse(self):
+
+        query = """
+        getFunctionASTsByName('test_buf_def')
+        .astNodes().filter{it.isCFGNode == 'True'}
+        .uses().code
+        """
+
+        x = self.j.runGremlinQuery(query)
+        
+        self.assertTrue('buf' in x)
+        self.assertTrue('i' in x)
+
+    def testNonDerefUnary(self):
+
+        query = """
+        getFunctionASTsByName('nonDerefUnary')
+        .astNodes().filter{it.isCFGNode == 'True'}
+        .uses().code
+        """
+
+        x = self.j.runGremlinQuery(query)
+        self.assertEquals(x[0], 'a')
