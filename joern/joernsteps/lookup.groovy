@@ -22,9 +22,9 @@ Object.metaClass.queryNodeIndex = { query, honorVisibility = true ->
 	
 	try{
 	  if(honorVisibility)
-	    new Neo4jVertexSequence(index.query(query), g)._().visible()
+	    new Neo4j2VertexIterable(index.query(query), g)._().visible()
 	   else
-	    new Neo4jVertexSequence(index.query(query), g)._()
+	    new Neo4j2VertexIterable(index.query(query), g)._()
 	}catch(ParseException){
 	  return []._()
 	}
