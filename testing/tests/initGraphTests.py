@@ -77,7 +77,7 @@ class InitGraphTests(PythonJoernTests):
         
         """
         x = self.j.runGremlinQuery(query)
-        self.assertEquals(x, 'true')
+        self.assertEquals(x, True)
 
     def testCanBeTainted2(self):
         
@@ -91,7 +91,7 @@ class InitGraphTests(PythonJoernTests):
         
         """
         x = self.j.runGremlinQuery(query)
-        self.assertEquals(x, 'false')
+        self.assertEquals(x, False)
 
     def testIsTainted1(self):
         
@@ -107,7 +107,7 @@ class InitGraphTests(PythonJoernTests):
 
         """
         x = self.j.runGremlinQuery(query)
-        self.assertEquals(x[0], 'true')
+        self.assertEquals(x[0], True)
 
     def testIsTainted2(self):
         
@@ -123,7 +123,7 @@ class InitGraphTests(PythonJoernTests):
 
         """
         x = self.j.runGremlinQuery(query)
-        self.assertEquals(x[0], 'false')
+        self.assertEquals(x[0], False)
 
     
     def testTaintedArgs1(self):
@@ -160,13 +160,13 @@ class InitGraphTests(PythonJoernTests):
         query = """
         
         argDescrs = [{ it.code.contains('sourceA')}, { it.code.contains('sourceB')} ]
-        sanitizerDescrs = [ {it,s -> false}, { it,s -> it.code.contains(s) }]
+        sanitizerDescrs = [ null, { it,s -> it.code.contains(s) }]
         
         getFunctionASTsByName("two_arg_sink_caller_p")
         .match{ it.type == "CallExpression" && it.code.startsWith('asink') }
         .taintedArgs(argDescrs)
         .unchecked(sanitizerDescrs)
-        
+                
         """
         x = self.j.runGremlinQuery(query)
         self.assertEquals(len(x), 1)
