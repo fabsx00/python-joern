@@ -107,7 +107,7 @@ Gremlin.defineStep('uPath', [Vertex, Pipe], { sanitizer, src = { [1]._() } ->
 
 */
 
-cfgPaths = { symbol, sanitizer, src, dst ->
+Object.metaClass.cfgPaths = { symbol, sanitizer, src, dst ->
   _cfgPaths(symbol, sanitizer,
 	    src, dst, [:], [])
 }
@@ -171,7 +171,7 @@ Object.metaClass._cfgPaths = {symbol, sanitizer, curNode, dst, visited, path ->
    @params The map (multiset) of visited nodes
 */
 
-isTerminationNode = { symbol, sanitizer, curNode, visited -> 
+Object.metaClass.isTerminationNode = { symbol, sanitizer, curNode, visited ->
   
   def curNodeId = curNode.id
   
