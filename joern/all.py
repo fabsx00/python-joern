@@ -32,16 +32,13 @@ class JoernSteps:
         assumed that a connection to the database has been
         established. To allow the user-defined steps located in the
         joernsteps directory to be used in the query, these step
-        definitions are prepended to the query."""
+        definitions are sent before the first query."""
         
         if not self.initCommandSent:
-            self.initCommand = self._createInitCommand()
+            self.gremlin.execute(self._createInitCommand())
             self.initCommandSent = True
-            finalQuery = self.initCommand
-        else:
-            finalQuery = ""
-        finalQuery += query
-        return self.gremlin.execute(finalQuery)
+
+        return self.gremlin.execute(query)
         
     def runCypherQuery(self, cmd):
         """ Runs the specified cypher query on the graph database."""
