@@ -15,7 +15,7 @@ Gremlin.defineStep('toExitNode', [Vertex,Pipe], {
     high branching-factor CFGs, e.g. state machines).
 */
 Object.metaClass._reachableCfgNodes = { curNodes, visited ->
-  nextNodes = curNodes._().out('FLOWS_TO').dedup.toSet() - visited
+  nextNodes = curNodes._().out('FLOWS_TO').toSet() - visited
   if (nextNodes.isEmpty()) { return visited }
 
   visited.addAll(nextNodes)
