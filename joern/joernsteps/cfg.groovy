@@ -27,5 +27,5 @@ Gremlin.defineStep('reachableCfgNodes', [Vertex, Pipe], {
 })
 
 Object.metaClass.isInLoop = { it ->
-  it._().reachableCfgNodes().toSet().contains(it)
+  it._().reachableCfgNodes().toSet().contains(it.statements().toList()[0])
 }
