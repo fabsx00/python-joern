@@ -32,6 +32,10 @@ Gremlin.defineStep('parameterToCallerArgs', [Vertex, Pipe], {
    _().transform{
 	   paramNum = it.childNum;
 	   funcName = it.functions().name.toList()[0];
+
+	   funcName = funcName.split(' ')[-1].trim()
+	   funcName = funcName.replace('*', '')
+	   
 	   getCallsTo(funcName).ithArguments(paramNum)
    }.scatter()
 })

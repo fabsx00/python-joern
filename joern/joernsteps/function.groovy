@@ -31,6 +31,11 @@ Gremlin.defineStep('functionToFile', [Vertex, Pipe], {
 
 Gremlin.defineStep('functionToCallers', [Vertex,Pipe], {
 	_().transform{
-		getCallsTo(it.name)
+
+		funcName = it.name
+		funcName = funcName.split(' ')[-1].trim()
+	   	funcName = funcName.replace('*', '')
+
+		getCallsTo(funcName)
 	}.scatter()
 })
