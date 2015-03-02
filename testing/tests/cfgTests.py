@@ -24,6 +24,12 @@ class CFGTests(PythonJoernTests):
         .outE('FLOWS_TO').flowLabel""" % function
         return self.j.runGremlinQuery(query)
 
+    def _isInLoop(self, function, callee):
+        query = """isInLoop(getFunctionsByName('%s')
+        .functionsToASTNodesOfType('Callee')
+        .filter { it.code == '%s' }.toList()[0])""" % (function, callee)
+        return self.j.runGremlinQuery(query)
+
     
 
     def testSwitch1(self):
@@ -77,6 +83,7 @@ class CFGTests(PythonJoernTests):
         self.assertIn('True', labels)
         self.assertIn('False', labels)
         self.assertEqual(len(labels), 2)
+        self.assertTrue(self._isInLoop('simple_for_test', 'A'))
 
     def testInfiniteFor(self):
         self.assertEquals(len(self._numberCFGNodes('infinite_for_test')), 4)
@@ -85,6 +92,7 @@ class CFGTests(PythonJoernTests):
         self.assertIn('True', labels)
         self.assertIn('False', labels)
         self.assertEqual(len(labels), 2)
+        self.assertTrue(self._isInLoop('infinite_for_test', 'A'))
 
     def testFor1(self):
         self.assertEquals(len(self._numberCFGNodes('for_test1')), 4)
@@ -93,6 +101,7 @@ class CFGTests(PythonJoernTests):
         self.assertIn('True', labels)
         self.assertIn('False', labels)
         self.assertEqual(len(labels), 2)
+        self.assertTrue(self._isInLoop('for_test1', 'A'))
 
     def testFor2(self):
         self.assertEquals(len(self._numberCFGNodes('for_test2')), 5)
@@ -101,7 +110,10 @@ class CFGTests(PythonJoernTests):
         self.assertIn('True', labels)
         self.assertIn('False', labels)
         self.assertEqual(len(labels), 2)
+        self.assertTrue(self._isInLoop('for_test2', 'A'))
     
     def testComplexCFG(self):
         self.assertEquals(len(self._numberCFGNodes('complex_test')), 29)
         self.assertEquals(len(self._numberCFGEdges('complex_test')), 36)
+        self.assertTrue(self._isInLoop('complex_test', 'A'))
+        self.assertFalse(self._isInLoop('complex_test', 'B'))
