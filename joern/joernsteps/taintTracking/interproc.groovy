@@ -135,8 +135,8 @@ Gremlin.defineStep('codeMatches', [Vertex, Pipe], { regex, s ->
 		_().filter{it.code.matches(regex) }
 })
 
-NO_RESTRICTION = { a,s -> []}
-ANY_SOURCE = { [1]._() }
+Object.metaClass.NO_RESTRICTION = { a,s -> []}
+Object.metaClass.ANY_SOURCE = { [1]._() }
 
 Object.metaClass.source = { closure ->
   return { if(closure(it)) [10] else [] }
