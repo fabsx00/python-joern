@@ -153,8 +153,8 @@ Object.metaClass._cfgPaths = {symbol, sanitizer, curNode, dst, visited, path ->
     // If we find one path, there's no need to explore the others
     if(!x.isEmpty()){ return x }
 
-    // Limit depth of CFG paths to 20
-    if(path.size() > 20) return []
+    // Limit depth of CFG paths to 30
+    if(path.size() > 30) return []
     
   }
 
