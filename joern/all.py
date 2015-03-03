@@ -1,5 +1,7 @@
 from py2neo import Graph
 from py2neo.ext.gremlin import Gremlin
+from py2neo.packages.httpstream import http
+
 import os
 
 DEFAULT_GRAPHDB_URL = "http://localhost:7474/db/data/"
@@ -10,6 +12,10 @@ class JoernSteps:
     def __init__(self):
         self._initJoernSteps()
         self.initCommandSent = False
+
+        # Bump the py2neo socket timeout from 30s, neo4j doesn't kill queries on timeout so might
+        #  as well let the client pick when to stop.
+        http.socket_timeout = 100000
 
     def setGraphDbURL(self, url):
         """ Sets the graph database URL. By default,
