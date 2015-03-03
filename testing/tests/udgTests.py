@@ -128,7 +128,7 @@ class UDGTests(PythonJoernTests):
         .defines().code
         """
         x = self.j.runGremlinQuery(query)
-        self.assertEquals(x[0], 'y')
+        self.assertTrue('y' in x)
 
     def testPlusEquals(self):
         query = """
@@ -139,7 +139,7 @@ class UDGTests(PythonJoernTests):
         """
 
         x = self.j.runGremlinQuery(query)
-        self.assertEquals(x[0], 'x')
+        self.assertTrue('x' in x)
 
     def testPlusEqualsExpr(self):
         query = """
@@ -159,7 +159,7 @@ class UDGTests(PythonJoernTests):
         .out('USE').code
         """
         x = self.j.runGremlinQuery(query)
-        self.assertEquals(x[0], 'x')
+        self.assertTrue('x' in x)
 
     def testPlusPlusDef(self):
         query = """
@@ -178,7 +178,7 @@ class UDGTests(PythonJoernTests):
         """
 
         x = self.j.runGremlinQuery(query)
-        self.assertEquals(x[0], 'a') 
+        self.assertTrue('a' in x)
 
     def testPlusPlusUseExpr(self):
         query = """
@@ -188,7 +188,7 @@ class UDGTests(PythonJoernTests):
         .out('USE').code
         """
         x = self.j.runGremlinQuery(query)
-        self.assertEquals(x[0], 'a') 
+        self.assertTrue('a' in x)
 
     def testAssignToArrayField(self):
         query = """
@@ -263,4 +263,4 @@ class UDGTests(PythonJoernTests):
         """
 
         x = self.j.runGremlinQuery(query)
-        self.assertEquals(x[0], 'a')
+        self.assertTrue('a' in x)
