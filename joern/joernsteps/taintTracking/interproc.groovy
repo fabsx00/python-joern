@@ -1,4 +1,3 @@
-
 import java.util.regex.Pattern;
 
 /******************************************************
@@ -12,7 +11,7 @@ import java.util.regex.Pattern;
  **/
 
 Gremlin.defineStep('expandParameters', [Vertex, Pipe], {
-	
+
 	_().transform{
 	  if(it.type == 'Parameter'){
 		def l = it.parameterToCallerArgs().toList();
@@ -35,7 +34,7 @@ Gremlin.defineStep('parameterToCallerArgs', [Vertex, Pipe], {
 
 	   funcName = funcName.split(' ')[-1].trim()
 	   funcName = funcName.replace('*', '')
-	   
+
 	   getCallsTo(funcName).ithArguments(paramNum)
    }.scatter()
 })
@@ -49,9 +48,9 @@ Gremlin.defineStep('parameterToCallerArgs', [Vertex, Pipe], {
 
 Gremlin.defineStep('expandArguments', [Vertex, Pipe], {
 	_().transform{
-	  
+
 	  def args = it.match{ it.type == "Argument"}.toList()
-	  
+
 	  if(args != []){
 			def l = args._().argToParameters().toList();
 			if(l != []) l else it._().toList()
@@ -62,12 +61,12 @@ Gremlin.defineStep('expandArguments', [Vertex, Pipe], {
 
 Gremlin.defineStep('argToParameters', [Vertex, Pipe], {
 	_().transform{
-		argNum = it.childNum;		
-		def callee = it.argToCall().callToCallee().code.toList()[0]		
+		argNum = it.childNum;
+		def callee = it.argToCall().callToCallee().code.toList()[0]
 		callee = callee.replace('* ', '')
-		// callee = callee.split("(::)|(\\.)")[-1].trim()		
+		// callee = callee.split("(::)|(\\.)")[-1].trim()
 		callee = callee.split(' ')[-1].trim()
-		
+
 		getFunctionASTsByName(callee)
 		.children().filter{ it.type == "ParameterList"}
 		.children().filter{ it.childNum == argNum}.toList()
@@ -81,19 +80,19 @@ Gremlin.defineStep('argToParameters', [Vertex, Pipe], {
  * */
 
 Gremlin.defineStep('argTainters', [Vertex,Pipe], {
-	
+
 	_().transform{
-	
+
 		def params = it.taintedArguments().expandArguments().toList();
-				
+
 		if(params == [])
 			return []._()
-		
+
 		symbols = params._().transform{ x = it.code.split(' '); x[1 .. ( x.size()-1)].join(' ') }.toList()
 		params[0]._().toExitNode().producers(symbols).toList()
 	}.scatter()
-	
-		
+
+
 })
 
 /**
@@ -107,10 +106,10 @@ Gremlin.defineStep('taintedArguments', [Vertex,Pipe], {
 
 
 Gremlin.defineStep('checks', [Vertex,Pipe], { regex ->
-		
+
 	_().as('y').match{ it.type in ['EqualityExpression', 'RelationalExpression', 'PrimaryExpression', 'UnaryOp'] }
-  	.back('y').uses().filter{ it.code.matches('.*' + Pattern.quote(regex) + '.*') }  
-	  
+	.back('y').uses().filter{ it.code.matches('.*' + Pattern.quote(regex) + '.*') }
+
 })
 
 Gremlin.defineStep('checksRaw', [Vertex,Pipe], { regex ->
@@ -118,17 +117,17 @@ Gremlin.defineStep('checksRaw', [Vertex,Pipe], { regex ->
 	_().as('y').match{ it.type in ['EqualityExpression', 'RelationalExpression', 'PrimaryExpression', 'UnaryOp'] }
 	.back('y').uses().filter{ it.code.matches(regex) }
 
-	  
+
 })
 
 Gremlin.defineStep('calls', [Vertex,Pipe], { regex ->
-	
+
 	_().match{ it.type in ['Callee'] }
 	.filter{ it.code.matches('.*' + Pattern.quote(regex) + '.*') }
 })
 
 Gremlin.defineStep('codeMatches', [Vertex, Pipe], { regex, s ->
-        s = Pattern.quote(s)
+	s = Pattern.quote(s)
 	if(regex.contains("%s"))
 		_().filter{it.code.matches(String.format(regex, s)) }
 	else
@@ -144,8 +143,8 @@ Object.metaClass.source = { closure ->
 
 Object.metaClass.sourceMatches = { regex ->
   return {
-	  	if(it.apiSyms().filter{ it.matches(regex) }.toList())
-		  	return [10]
+		if(it.apiSyms().filter{ it.matches(regex) }.toList())
+			return [10]
 		if( it.code.matches(regex) )
 			return [10]
 		return []
@@ -159,13 +158,13 @@ Object.metaClass.sourceMatches = { regex ->
  the last statements, which tainted any of the variables
  within this function or a caller. Note, that this traversal
  DOES NOT enter the callee.
-  
+
 */
 
 Gremlin.defineStep('argToInitNodes', [Vertex, Pipe], {
-  
+
   _().argToInitNodesLocal()
-  
+
   .ifThenElse{ it.type == 'Parameter'}
   { it.parameterToCallerArgs().argToInitNodes().scatter() }
   { it }
@@ -177,7 +176,7 @@ Gremlin.defineStep('argToInitNodes', [Vertex, Pipe], {
 */
 
 Gremlin.defineStep('argToInitNodesLocal', [Vertex, Pipe], {
-   
+
    _().sideEffect{ stmtId = it.statements().id.toList()[0] }
    .sliceBackFromArgument(1, ["REACHES"])
    .filter{ it.id != stmtId }
@@ -187,3 +186,50 @@ Gremlin.defineStep('argToInitNodesLocal', [Vertex, Pipe], {
 Gremlin.defineStep('nonEmpty', [Vertex,Pipe], { closure ->
 	_().filter{ closure(it).toList() != [] }
 })
+
+/**
+  Starting from a sink-node 'it' and for a given
+  source-description 'sourceDescription', find all
+  source nodes that match the source description
+  even across the boundaries of functions.
+  Elements in the returned list are pairs of the form
+  [id, isFinalNode] where 'id' is the node's id and
+  isFinalNode indicates whether no further expansion
+  of this node was performed.
+**/
+
+Object.metaClass.getNodesToSrc = { it, sourceDescription, N_LOOPS ->
+
+  _getNodesToSrc(it, sourceDescription, 0, N_LOOPS).unique()
+}
+
+Object.metaClass._getNodesToSrc = { it, src, depth, N_LOOPS ->
+
+
+  if(src(it).toList() != [1] && src(it).toList() != []){
+	// found src
+	 return [ [it.id,true] ]
+  }
+
+  if(depth == N_LOOPS){
+	  if(src(it).toList() == [1])
+		  return [ [it.id,true] ]
+	  else
+		  return []
+  }
+
+  def children = it._().taintedArgExpand()
+   // .expandParameters().allProducers()
+  .toList()
+
+  def x = children.collect{ child ->
+	  _getNodesToSrc(child, src, depth + 1, N_LOOPS)
+  }
+  .inject([]) {acc, val-> acc.plus(val)}	// flatten by one layer
+  .unique()
+
+  if(x == [])
+	  return [[it.id, true]]
+  else
+	  return x.plus([[it.id, false]])
+}
