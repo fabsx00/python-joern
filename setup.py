@@ -21,6 +21,5 @@ setup(
                             'joernsteps/taintTracking/*.groovy',
                             'joernsteps/taintTracking/initGraphs/*.groovy'
                         ]},
-    install_requires = ['py2neo-gremlin == 0.1'],
-    dependency_links = ['https://github.com/fabsx00/py2neo-gremlin/tarball/master/#egg=py2neo-gremlin-0.1']
+    install_requires = ['py2neo >= 2.0.7']
 )
