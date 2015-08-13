@@ -10,8 +10,7 @@ traversals.
 Dependencies:
 --
 
-+ py2neo 1.6.1 (http://book.py2neo.org/en/latest/)
-+ py2neo-gremlin (https://github.com/fabsx00/py2neo-gremlin/)
++ py2neo 2.0.7 (http://py2neo.org/2.0/)
 
 
 ### Installation
