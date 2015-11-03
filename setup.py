@@ -19,7 +19,8 @@ setup(
                             'joernsteps/learning/*.groovy',
                             'joernsteps/syntax/*.groovy',
                             'joernsteps/taintTracking/*.groovy',
-                            'joernsteps/taintTracking/initGraphs/*.groovy'
+                            'joernsteps/taintTracking/initGraphs/*.groovy',
+                            'joernsteps/typeInference/*.groovy',
                         ]},
     install_requires = ['py2neo >= 2.0.7']
 )
