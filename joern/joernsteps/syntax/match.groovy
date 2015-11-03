@@ -13,6 +13,9 @@ Gremlin.defineStep('match', [Vertex, Pipe], { p ->
   _().astNodes().filter(p)
 })
 
+Gremlin.defineStep('matchChildren', [Vertex, Pipe], { p, q={false} ->
+  _().children().loop(1){ !q(it.object) }{ p(it.object) }
+})
 
 /**
  Walk the tree into the direction of the root
@@ -21,9 +24,10 @@ Gremlin.defineStep('match', [Vertex, Pipe], { p ->
  include the enclosing statement node.
 */
 
-Gremlin.defineStep('matchParents', [Vertex,Pipe], { p ->
-	_().in(AST_EDGE).loop(1){it.object.isCFGNode != 'True'}{ p(it.object) }
+Gremlin.defineStep('matchParents', [Vertex,Pipe], { p, q={false} ->
+  _().parents().loop(1){it.object.isCFGNode != 'True' && !q(it.object) }{ p(it.object) }
 })
+
 
 /**
    
