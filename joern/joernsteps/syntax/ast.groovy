@@ -48,6 +48,17 @@ Object.metaClass.isStatement = { it ->
   it.isCFGNode == 'True'
 }
 
+
+/**
+ * Traverse to siblings.
+ */
+Gremlin.defineStep('siblings', [Vertex, Pipe], {
+	_().sideEffect{ nodeId = it.id }
+	.parents()
+	.children()
+	.filter{ it.id != nodeId }
+});
+
 /**
    Traverse to statements enclosing supplied AST nodes. This may be
    the node itself.
