@@ -22,5 +22,5 @@ setup(
                             'joernsteps/taintTracking/initGraphs/*.groovy',
                             'joernsteps/typeInference/*.groovy',
                         ]},
-    install_requires = ['py2neo >= 2.0.7']
+    install_requires = ['py2neo >= 2.0.7, <3.0.0']
 )
